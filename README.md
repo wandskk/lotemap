@@ -32,7 +32,7 @@ Construir um SaaS multiempresa para loteamentos que permita:
 - Frontend/Backend: `Next.js (App Router)` + `TypeScript`
 - UI: `Tailwind CSS` + `shadcn/ui`
 - Banco: `PostgreSQL` + `Prisma`
-- Auth: `Auth.js`
+- Auth: `NextAuth` (v4, credentials + JWT) — variaveis `NEXTAUTH_URL`, `NEXTAUTH_SECRET` ou `AUTH_SECRET`
 - Forms/validacao: `React Hook Form` + `Zod`
 - Mapa: `SVG interativo` + `react-zoom-pan-pinch`
 - Deploy: `Vercel`
@@ -85,7 +85,7 @@ Admin:
 - `/admin/developments`
 - `/admin/lots`
 - `/admin/blocks`
-- `/admin/users`
+- `/admin/users` (gestão de usuários, superadmin)
 
 ## Plano de execucao ate a conclusao
 
@@ -174,50 +174,87 @@ Consideramos o MVP concluido quando:
 
 ## Checklist mestre (acompanhamento)
 
-Status atual:
-- [x] Fase 0 iniciada
-- [ ] Fase 0 validada em execucao local com dependencias instaladas
+**Ultima revisao do codigo:** auditoria manual do repositorio (README alinhado ao que existe hoje).
+
+### Fases (macro)
+
+| Fase | Nome | Status |
+|------|------|--------|
+| 0 | Setup da fundacao | **Concluida** (dev local, Prisma+PG, Tailwind, auth, proxy Next 16) |
+| 1 | Base de dominio (Prisma) | **Concluida** (schema + migrations + seed) |
+| 2 | Dashboard inicial | **Quase concluida** (CRUD cidades, loteamentos, quadras, lotes; falta refino / usuarios / empresa na UI) |
+| 3 | Planta interativa | **Em andamento** (preview admin com SVG URL + zoom/cores; upload e pagina publica pendentes) |
+| 4 | Landing publica | **Em andamento** (hero, sobre, local, planta, WhatsApp flutuante + CTA por lote) |
+| 5 | Dados internos e historico | **Concluida** (comprador + historico no admin; gravacao em edicao de lote e em dados do comprador) |
+| 6 | Polimento | **Em andamento** |
 
 ### Fundacao
-- [ ] projeto criado
-- [ ] Tailwind configurado
-- [ ] shadcn instalado
-- [ ] Prisma configurado
-- [ ] banco conectado
-- [ ] Auth.js funcionando
+- [x] projeto Next.js + TypeScript (App Router)
+- [x] Tailwind CSS (v4 + `@tailwindcss/postcss`)
+- [ ] **shadcn/ui** (ainda nao instalado — previsto na stack; UI atual e HTML + classes Tailwind)
+- [x] Prisma + PostgreSQL (`prisma.config.ts`, migrations)
+- [x] Prisma Client com **`@prisma/adapter-pg` + `pg`** (requisito Prisma 7)
+- [x] NextAuth v4 (login por credenciais + `SessionProvider` + `getServerSession`)
+- [x] `NEXTAUTH_URL` configurado (evita erro de callback / CredentialsSignin)
+- [x] Estrutura de pastas base (`src/app`, `src/lib`, `src/services`, etc.)
+- [x] Convencao **`src/proxy.ts`** (substitui `middleware` no Next 16)
 
-### Dominio
-- [ ] Company
-- [ ] User
-- [ ] City
-- [ ] Development
-- [ ] Block
-- [ ] Lot
-- [ ] LotOwnerInfo
-- [ ] LotHistory
+### Dominio — modelagem Prisma (todas as tabelas do MVP inicial)
+- [x] `Company`
+- [x] `User`
+- [x] `City`
+- [x] `Development`
+- [x] `Block`
+- [x] `Lot`
+- [x] `LotOwnerInfo`
+- [x] `LotHistory`
+- [x] Seed de desenvolvimento (`npm run prisma:seed` + `package.json` → `prisma.seed`)
 
-### Dashboard
-- [ ] login
-- [ ] listagem de loteamentos
-- [ ] cadastro de loteamento
-- [ ] cadastro de quadras
-- [ ] cadastro de lotes
-- [ ] edicao de dados internos
+### Dominio — telas / fluxos admin (CRUD ou gestao)
+- [ ] **Empresas** (superadmin): sem tela dedicada; empresa criada via seed
+- [x] **Usuarios** (`/admin/users`): listagem + CRUD (restrito a **Superadmin**); login do painel segue `ADMIN_EMAIL` no `.env`
+- [x] **Cidades** (`/admin/cities`): CRUD
+- [x] **Loteamentos** (`/admin/developments`): CRUD (empresa + cidade + slug unico por cidade)
+- [x] **Quadras** (`/admin/blocks`): CRUD por loteamento (filtro via `?developmentId=`)
+- [x] **Lotes** (`/admin/lots`): CRUD por loteamento + quadra (`?developmentId=` e `blockId=`)
+- [x] **Dados internos do lote (comprador)**: pagina `/admin/lots/[lotId]` com `LotOwnerInfo`
+- [x] **Historico** (`LotHistory`): listagem na pagina do lote; gravacao em salvar comprador (`LOT_OWNER_INFO_SAVE`) e ao salvar lote na lista (`LOT_UPDATE`)
 
-### Publico
-- [ ] rota publica por loteamento
-- [ ] hero e blocos institucionais
-- [ ] planta SVG interativa
-- [ ] drawer/modal do lote
-- [ ] botao flutuante de WhatsApp
-- [ ] CTA contextual por lote
+### Dashboard (comportamento)
+- [x] Login (`/admin/login`) + logout — feedback de erro (`signIn` sem redirect + `AdminCallout`), loading, tratamento de `?error=CredentialsSignin`, layout em cartão e link “Voltar ao site”
+- [x] Protecao do painel: `getSession` no layout `(dashboard)` (rotas publicas de login fora do grupo)
+- [x] Layout com navegacao (Visao geral, Cidades, Loteamentos, Quadras, Lotes, Usuarios)
+- [x] Listagem / cadastro / edicao de loteamentos (na propria lista)
+
+### Planta — preview no admin
+- [x] Campo **URL da planta SVG** (`mapSvgUrl`) no CRUD de loteamentos
+- [x] Pagina **`/admin/developments/[id]/map`**: carrega SVG (fetch servidor), zoom/pan (`react-zoom-pan-pinch`), cores por status publico, clique por `geometryRef` (id ou `data-lot-id` no SVG)
+- [ ] Upload de SVG para storage (hoje apenas URL publica)
+- [ ] Reaproveitar o mesmo componente na **landing publica** (Fase 4)
+
+### Publico (`/{city}/{development}`)
+- [x] Rota publica (`src/app/(public)/[city]/[development]/page.tsx`)
+- [x] Hero (nome, cidade, descricao curta, CTAs)
+- [x] Secao **Sobre** (`fullDescription`) e **Localizacao** (`address`) quando preenchidos
+- [x] Planta SVG (mesmo componente de preview, `variant="public"`) + URL absoluta/relativa via `getRequestOrigin`
+- [x] Painel do lote selecionado (dados publicos apenas) + **CTA WhatsApp** por lote
+- [x] Botao flutuante WhatsApp (mensagem padrao)
+- [x] `generateMetadata` basico (title / description / OG)
+- [ ] Drawer/modal dedicado (hoje painel abaixo da planta; pode evoluir)
+- [ ] Garantia extra: revisar qualquer nova API publica para nao vazar campos internos
 
 ### Qualidade
-- [ ] responsivo
-- [ ] permissoes funcionando
-- [ ] SEO basico
-- [ ] mensagens de erro
-- [ ] estados vazios
+- [x] Responsividade revisada ponta a ponta (parcial: painel admin — padding mobile, menu com rolagem horizontal, selects de filtro em largura total no mobile)
+- [x] Permissao basica (sessao obrigatoria no admin) — **regra por empresa/usuario ainda nao implementada** (hoje so login bootstrap)
+- [x] SEO basico na landing (canonical, OG/Twitter, `NEXT_PUBLIC_SITE_URL` / Vercel para URLs absolutas)
+- [x] Mensagens de erro e estados vazios consistentes (componente `AdminCallout` + textos orientando próximo passo)
+- [x] Acessibilidade parcial (skip link na landing publica, foco visivel global, menu admin com `aria-current`, regiao da planta com `aria-label`)
+- [ ] Testes automatizados (nao previstos ainda)
+
+### Itens fora do checklist original mas importantes
+- [ ] Instalar e padronizar **shadcn/ui** (dependencias + `components.json`)
+- [ ] **Storage** de SVG/banner/logo (Cloudinary/S3) + campos so URL hoje
+- [ ] Alinhar nome da doc: stack diz "Auth.js"; runtime e **NextAuth v4** (documentado acima)
 
 ## Como vamos executar parte por parte
 
@@ -252,23 +289,33 @@ Regra pratica:
 16. `decisions/ADR-002-map-engine.md`
 17. `decisions/ADR-003-hosting.md`
 
-## Proximo passo recomendado
+## Proximos passos recomendados (ordem sugerida)
 
-Iniciar imediatamente a **Fase 0 - Setup da fundacao** e fechar o primeiro bloco com:
-- projeto criado
-- stack base configurada
-- auth e banco operacionais
+1. **Instalar shadcn/ui** (padronizar inputs/botões/dialogs) ou **tela `/admin/users`** (listar usuários da empresa) — conforme prioridade de produto
+2. **Fechar Fase 2 — dashboard** (nucleo do CRUD: feito)
+   - Opcional: tela de **usuarios** (`/admin/users`) e **empresas** para multi-tenant real na UI
+3. **Fase 3 — planta** (continuar)
+   - [x] Preview admin + `mapSvgUrl` + zoom/pan + cores
+   - Upload de SVG para storage (opcional) ou manter URL
+4. **Fase 4 — landing publica** (continuar)
+   - [x] Conteudo base + planta + WhatsApp
+   - Refinar layout, imagens (banner/logo), SEO avancado, drawer opcional
+5. ~~**Fase 5 — LotOwnerInfo + LotHistory** no admin~~ (feito)
+6. **Fase 6 — polimento** (responsividade, validacoes, a11y, estados vazios, SEO landing) + instalar **shadcn/ui** se quiser padronizar componentes
 
 ## Como rodar localmente (base atual)
 
 1. Instalar dependencias:
    - `npm install`
 2. Criar ambiente local:
-   - copiar `.env.example` para `.env.local`
-   - preencher `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` e `DATABASE_URL`
+   - copiar `.env.example` para `.env` (ou `.env.local`)
+   - preencher `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
+   - definir **`NEXTAUTH_URL=http://localhost:3000`** e **`NEXTAUTH_SECRET` ou `AUTH_SECRET`**
 3. Gerar client Prisma:
    - `npm run prisma:generate`
-4. Rodar migracao inicial:
-   - `npm run prisma:migrate -- --name init`
-5. Iniciar servidor:
+4. Rodar migracoes (se ainda nao aplicou):
+   - `npm run prisma:migrate`
+5. (Opcional) Seed:
+   - `npm run prisma:seed`
+6. Iniciar servidor:
    - `npm run dev`

@@ -1,0 +1,164 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .road { fill: #dbe4ee; stroke: #b8c4d3; stroke-width: 2; }
+      .border { fill: none; stroke: #475569; stroke-width: 4; }
+      .lot { stroke: #334155; stroke-width: 2; cursor: pointer; transition: opacity .2s ease; }
+      .lot:hover { opacity: 0.85; }
+      .available { fill: #86efac; }
+      .reserved { fill: #fde68a; }
+      .sold { fill: #fca5a5; }
+      .blocked { fill: #cbd5e1; }
+      .label { font-family: Arial, Helvetica, sans-serif; font-size: 18px; fill: #0f172a; font-weight: 700; }
+      .small { font-family: Arial, Helvetica, sans-serif; font-size: 12px; fill: #334155; }
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 28px; fill: #0f172a; font-weight: 700; }
+      .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 16px; fill: #475569; }
+      .legend-text { font-family: Arial, Helvetica, sans-serif; font-size: 16px; fill: #0f172a; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1000"/>
+
+  <text x="60" y="70" class="title">Exemplo de Planta SVG de Loteamento</text>
+  <text x="60" y="100" class="subtitle">Arquivo ilustrativo para usar como base no LoteMap</text>
+
+  <rect x="60" y="140" width="1180" height="760" rx="18" class="border"/>
+
+  <rect x="180" y="210" width="920" height="90" rx="10" class="road"/>
+  <rect x="180" y="470" width="920" height="90" rx="10" class="road"/>
+  <rect x="180" y="730" width="920" height="90" rx="10" class="road"/>
+
+  <rect x="420" y="140" width="90" height="760" rx="10" class="road"/>
+  <rect x="760" y="140" width="90" height="760" rx="10" class="road"/>
+
+  <text x="545" y="265" class="label">RUA A</text>
+  <text x="545" y="525" class="label">RUA B</text>
+  <text x="545" y="785" class="label">RUA C</text>
+
+  <text x="448" y="545" transform="rotate(-90 448 545)" class="label">AV. 01</text>
+  <text x="788" y="545" transform="rotate(-90 788 545)" class="label">AV. 02</text>
+
+  <g id="quadra-a">
+    <text x="95" y="205" class="label">QUADRA A</text>
+
+    <rect id="A-01" x="85" y="220" width="90" height="110" rx="6" class="lot available"/>
+    <text x="108" y="278" class="label">A-01</text>
+    <text x="106" y="298" class="small">250 m²</text>
+
+    <rect id="A-02" x="85" y="335" width="90" height="110" rx="6" class="lot reserved"/>
+    <text x="108" y="393" class="label">A-02</text>
+    <text x="106" y="413" class="small">250 m²</text>
+
+    <rect id="A-03" x="85" y="450" width="90" height="110" rx="6" class="lot sold"/>
+    <text x="108" y="508" class="label">A-03</text>
+    <text x="106" y="528" class="small">250 m²</text>
+
+    <rect id="A-04" x="85" y="565" width="90" height="110" rx="6" class="lot available"/>
+    <text x="108" y="623" class="label">A-04</text>
+    <text x="106" y="643" class="small">250 m²</text>
+
+    <rect id="A-05" x="85" y="680" width="90" height="110" rx="6" class="lot blocked"/>
+    <text x="108" y="738" class="label">A-05</text>
+    <text x="106" y="758" class="small">250 m²</text>
+  </g>
+
+  <g id="quadra-b">
+    <text x="210" y="205" class="label">QUADRA B</text>
+
+    <rect id="B-01" x="200" y="310" width="95" height="140" rx="6" class="lot available"/>
+    <text x="226" y="382" class="label">B-01</text>
+    <text x="222" y="402" class="small">275 m²</text>
+
+    <rect id="B-02" x="300" y="310" width="95" height="140" rx="6" class="lot sold"/>
+    <text x="326" y="382" class="label">B-02</text>
+    <text x="322" y="402" class="small">275 m²</text>
+
+    <rect id="B-03" x="200" y="565" width="95" height="140" rx="6" class="lot reserved"/>
+    <text x="226" y="637" class="label">B-03</text>
+    <text x="222" y="657" class="small">275 m²</text>
+
+    <rect id="B-04" x="300" y="565" width="95" height="140" rx="6" class="lot available"/>
+    <text x="326" y="637" class="label">B-04</text>
+    <text x="322" y="657" class="small">275 m²</text>
+  </g>
+
+  <g id="quadra-c">
+    <text x="525" y="205" class="label">QUADRA C</text>
+
+    <polygon id="C-01" points="530,320 660,320 640,450 530,450" class="lot available"/>
+    <text x="565" y="387" class="label">C-01</text>
+    <text x="556" y="407" class="small">300 m²</text>
+
+    <polygon id="C-02" points="670,320 800,320 800,450 650,450" class="lot reserved"/>
+    <text x="705" y="387" class="label">C-02</text>
+    <text x="696" y="407" class="small">320 m²</text>
+
+    <polygon id="C-03" points="530,565 660,565 650,705 530,705" class="lot sold"/>
+    <text x="565" y="642" class="label">C-03</text>
+    <text x="556" y="662" class="small">310 m²</text>
+
+    <polygon id="C-04" points="670,565 800,565 790,705 650,705" class="lot available"/>
+    <text x="705" y="642" class="label">C-04</text>
+    <text x="696" y="662" class="small">315 m²</text>
+  </g>
+
+  <g id="quadra-d">
+    <text x="880" y="205" class="label">QUADRA D</text>
+
+    <rect id="D-01" x="880" y="315" width="95" height="130" rx="6" class="lot blocked"/>
+    <text x="906" y="383" class="label">D-01</text>
+    <text x="902" y="403" class="small">280 m²</text>
+
+    <rect id="D-02" x="980" y="315" width="95" height="130" rx="6" class="lot available"/>
+    <text x="1006" y="383" class="label">D-02</text>
+    <text x="1002" y="403" class="small">280 m²</text>
+
+    <rect id="D-03" x="880" y="570" width="95" height="130" rx="6" class="lot sold"/>
+    <text x="906" y="638" class="label">D-03</text>
+    <text x="902" y="658" class="small">280 m²</text>
+
+    <rect id="D-04" x="980" y="570" width="95" height="130" rx="6" class="lot reserved"/>
+    <text x="1006" y="638" class="label">D-04</text>
+    <text x="1002" y="658" class="small">280 m²</text>
+  </g>
+
+  <g id="area-verde">
+    <path d="M1125 250 C1180 210, 1240 210, 1280 250 C1320 290, 1320 350, 1280 395 C1240 440, 1180 440, 1125 395 C1085 355, 1085 290, 1125 250 Z"
+          fill="#bbf7d0" stroke="#15803d" stroke-width="3"/>
+    <text x="1140" y="325" class="label">ÁREA VERDE</text>
+  </g>
+
+  <g id="equipamento">
+    <rect x="1120" y="520" width="180" height="140" rx="12" fill="#e2e8f0" stroke="#64748b" stroke-width="3"/>
+    <text x="1152" y="590" class="label">EQUIPAMENTO</text>
+    <text x="1170" y="615" class="small">comunitário</text>
+  </g>
+
+  <g id="legenda">
+    <rect x="1300" y="160" width="240" height="250" rx="16" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="1330" y="200" class="label">LEGENDA</text>
+
+    <rect x="1330" y="225" width="28" height="28" rx="4" class="available"/>
+    <text x="1370" y="245" class="legend-text">Disponível</text>
+
+    <rect x="1330" y="270" width="28" height="28" rx="4" class="reserved"/>
+    <text x="1370" y="290" class="legend-text">Reservado</text>
+
+    <rect x="1330" y="315" width="28" height="28" rx="4" class="sold"/>
+    <text x="1370" y="335" class="legend-text">Vendido</text>
+
+    <rect x="1330" y="360" width="28" height="28" rx="4" class="blocked"/>
+    <text x="1370" y="380" class="legend-text">Indisponível</text>
+  </g>
+
+  <g id="info-box">
+    <rect x="1290" y="470" width="260" height="250" rx="16" fill="white" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="1320" y="510" class="label">EXEMPLO DE DADOS</text>
+    <text x="1320" y="550" class="legend-text">Lote: C-04</text>
+    <text x="1320" y="580" class="legend-text">Área: 315 m²</text>
+    <text x="1320" y="610" class="legend-text">Status: disponível</text>
+    <text x="1320" y="640" class="legend-text">Valor: R$ 94.500</text>
+    <text x="1320" y="680" class="small">No sistema real, isso viria do banco.</text>
+  </g>
+</svg>

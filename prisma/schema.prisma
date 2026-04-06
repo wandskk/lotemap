@@ -4,13 +4,34 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
   SUPERADMIN
   ADMIN
   MANAGER
+}
+
+enum DevelopmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PublicLotStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  UNAVAILABLE
+}
+
+enum InternalLotStatus {
+  NEW
+  CONTACTED
+  NEGOTIATION
+  DOCUMENTATION
+  CLOSED
+  CANCELED
 }
 
 model User {
@@ -23,7 +44,8 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  company      Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  lotsHistory  LotHistory[]
 }
 
 model Company {
@@ -38,5 +60,136 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users User[]
+  users        User[]
+  developments Development[]
+}
+
+model City {
+  id        String   @id @default(cuid())
+  name      String
+  state     String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  developments Development[]
+}
+
+model Development {
+  id                 String            @id @default(cuid())
+  companyId          String
+  cityId             String
+  name               String
+  slug               String
+  shortDescription   String?
+  fullDescription    String?
+  status             DevelopmentStatus @default(DRAFT)
+  address            String?
+  whatsapp           String?
+  latitude           Float?
+  longitude          Float?
+  pricePerSquareMeter Decimal?         @db.Decimal(12, 2)
+  bannerUrl          String?
+  logoUrl            String?
+  mapSvgUrl          String?
+  published          Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  city    City    @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  blocks  Block[]
+  lots    Lot[]
+
+  @@unique([cityId, slug])
+  @@index([companyId])
+  @@index([cityId])
+}
+
+model Block {
+  id            String   @id @default(cuid())
+  developmentId String
+  code          String
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  development Development @relation(fields: [developmentId], references: [id], onDelete: Cascade)
+  lots        Lot[]
+
+  @@unique([developmentId, code])
+  @@index([developmentId])
+}
+
+model Lot {
+  id             String            @id @default(cuid())
+  developmentId  String
+  blockId        String
+  code           String
+  number         String
+  areaM2         Decimal?          @db.Decimal(10, 2)
+  frontMeters    Decimal?          @db.Decimal(10, 2)
+  backMeters     Decimal?          @db.Decimal(10, 2)
+  leftMeters     Decimal?          @db.Decimal(10, 2)
+  rightMeters    Decimal?          @db.Decimal(10, 2)
+  publicStatus   PublicLotStatus   @default(AVAILABLE)
+  internalStatus InternalLotStatus @default(NEW)
+  estimatedValue Decimal?          @db.Decimal(12, 2)
+  manualValue    Decimal?          @db.Decimal(12, 2)
+  valuationFactor Decimal?         @db.Decimal(10, 4)
+  publicNotes    String?
+  internalNotes  String?
+  isFeatured     Boolean           @default(false)
+  visiblePublicly Boolean          @default(true)
+  geometryRef    String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  development Development  @relation(fields: [developmentId], references: [id], onDelete: Cascade)
+  block       Block        @relation(fields: [blockId], references: [id], onDelete: Restrict)
+  ownerInfo   LotOwnerInfo?
+  history     LotHistory[]
+
+  @@unique([developmentId, code])
+  @@unique([blockId, number])
+  @@unique([developmentId, geometryRef])
+  @@index([developmentId])
+  @@index([blockId])
+  @@index([publicStatus])
+}
+
+model LotOwnerInfo {
+  id              String    @id @default(cuid())
+  lotId           String    @unique
+  buyerName       String?
+  buyerDocument   String?
+  buyerPhone      String?
+  buyerEmail      String?
+  brokerName      String?
+  negotiatedValue Decimal?  @db.Decimal(12, 2)
+  reservationDate DateTime?
+  saleDate        DateTime?
+  paymentMethod   String?
+  contractSigned  Boolean   @default(false)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  lot Lot @relation(fields: [lotId], references: [id], onDelete: Cascade)
+}
+
+model LotHistory {
+  id            String   @id @default(cuid())
+  lotId         String
+  userId        String
+  action        String
+  previousValue Json?
+  newValue      Json?
+  createdAt     DateTime @default(now())
+
+  lot  Lot  @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([lotId])
+  @@index([userId])
 }

@@ -1,5 +1,5 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import type { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 
 const signInSchema = z.object({
@@ -7,32 +7,44 @@ const signInSchema = z.object({
   password: z.string().min(6),
 });
 
-const adminEmail = process.env.ADMIN_EMAIL;
-const adminPassword = process.env.ADMIN_PASSWORD;
+function normalizeEnv(value: string | undefined) {
+  return (value ?? "").trim().replace(/\r$/, "");
+}
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const adminEmail = normalizeEnv(process.env.ADMIN_EMAIL);
+const adminPassword = normalizeEnv(process.env.ADMIN_PASSWORD);
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
   session: { strategy: "jwt" },
   providers: [
-    Credentials({
+    CredentialsProvider({
+      id: "credentials",
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Senha", type: "password" },
       },
       authorize: async (credentials) => {
-        const parsed = signInSchema.safeParse(credentials);
+        const rawEmail = String(credentials?.email ?? "").trim();
+        const rawPassword = String(credentials?.password ?? "").trim();
+        const parsed = signInSchema.safeParse({
+          email: rawEmail,
+          password: rawPassword,
+        });
         if (!parsed.success) return null;
 
         if (!adminEmail || !adminPassword) return null;
 
-        if (
-          parsed.data.email === adminEmail &&
-          parsed.data.password === adminPassword
-        ) {
+        const emailOk =
+          parsed.data.email.toLowerCase() === adminEmail.toLowerCase();
+        const passwordOk = parsed.data.password === adminPassword;
+
+        if (emailOk && passwordOk) {
           return {
             id: "bootstrap-admin",
             email: parsed.data.email,
             name: "Admin LoteMap",
-            role: "SUPERADMIN",
           };
         }
 
@@ -43,4 +55,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/admin/login",
   },
-});
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.email = token.email as string;
+        session.user.name = token.name as string | null | undefined;
+      }
+      return session;
+    },
+  },
+};
