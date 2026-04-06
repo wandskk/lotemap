@@ -15,6 +15,17 @@ type PageProps = {
   }>;
 };
 
+function absoluteUrlForMetadata(
+  url: string | null | undefined,
+  base: URL | undefined,
+): string | undefined {
+  const t = url?.trim();
+  if (!t) return undefined;
+  if (t.startsWith("http://") || t.startsWith("https://")) return t;
+  if (base) return new URL(t, base).toString();
+  return undefined;
+}
+
 const getPublicDevelopment = cache(
   async (citySlug: string, developmentSlug: string) => {
     const city = await prisma.city.findUnique({
@@ -36,11 +47,13 @@ const getPublicDevelopment = cache(
           select: {
             id: true,
             code: true,
+            number: true,
             geometryRef: true,
             publicStatus: true,
             areaM2: true,
             estimatedValue: true,
             publicNotes: true,
+            block: { select: { code: true } },
           },
         },
       },
@@ -61,6 +74,7 @@ export async function generateMetadata({
     `Loteamento ${dev.name} em ${dev.city.name}.`;
   const path = `/${city}/${development}`;
   const base = resolveMetadataBase();
+  const bannerOg = absoluteUrlForMetadata(dev.bannerUrl, base);
   return {
     title: `${dev.name} · ${dev.city.name}`,
     description: desc,
@@ -73,11 +87,13 @@ export async function generateMetadata({
       type: "website",
       locale: "pt_BR",
       ...(base ? { url: new URL(path, base).toString() } : {}),
+      ...(bannerOg ? { images: [{ url: bannerOg, alt: dev.name }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: dev.name,
       description: desc,
+      ...(bannerOg ? { images: [bannerOg] } : {}),
     },
   };
 }
@@ -96,12 +112,21 @@ export default async function PublicDevelopmentPage({ params }: PageProps) {
     : null;
   const svgMarkup = svgUrl ? await fetchSvgMarkup(svgUrl) : null;
 
+  const bannerUrl = development.bannerUrl?.trim()
+    ? resolveAbsoluteSvgUrl(development.bannerUrl.trim(), origin)
+    : null;
+  const logoUrl = development.logoUrl?.trim()
+    ? resolveAbsoluteSvgUrl(development.logoUrl.trim(), origin)
+    : null;
+
   const whatsappDigits = development.whatsapp?.replace(/\D/g, "") ?? "";
   const cityLabel = `${development.city.name}/${development.city.state}`;
 
   const lots = development.lots.map((l) => ({
     id: l.id,
     code: l.code,
+    number: l.number,
+    blockCode: l.block.code,
     geometryRef: l.geometryRef,
     publicStatus: l.publicStatus,
     areaM2: l.areaM2 != null ? String(l.areaM2) : null,
@@ -123,37 +148,111 @@ export default async function PublicDevelopmentPage({ params }: PageProps) {
         tabIndex={-1}
       >
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-12">
-          <p className="text-sm font-medium text-slate-500">
-            {development.city.name} · {development.city.state}
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
-            {development.name}
-          </h1>
-          {development.shortDescription ? (
-            <p className="mt-4 max-w-2xl text-lg text-slate-600">
-              {development.shortDescription}
-            </p>
-          ) : null}
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              className="rounded-md bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-              href="#planta"
-            >
-              Ver planta dos lotes
-            </a>
-            {whatsappDigits ? (
-              <a
-                className="rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
-                href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(defaultWaMessage)}`}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Falar no WhatsApp
-              </a>
-            ) : null}
+        {bannerUrl ? (
+          <div className="relative min-h-[280px] w-full overflow-hidden md:min-h-[340px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              decoding="async"
+              fetchPriority="high"
+              src={bannerUrl}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-linear-to-t from-black/75 via-black/35 to-black/45"
+            />
+            <div className="relative mx-auto flex max-w-5xl flex-col gap-6 px-6 py-12 text-white">
+              <div className="flex flex-col gap-1 text-white/90 sm:flex-row sm:items-start sm:gap-6">
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt={`Logo — ${development.name}`}
+                    className="h-14 w-auto max-w-[200px] shrink-0 object-contain drop-shadow-md sm:h-20"
+                    decoding="async"
+                    src={logoUrl}
+                  />
+                ) : null}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-white/90">
+                    {development.city.name} · {development.city.state}
+                  </p>
+                  <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+                    {development.name}
+                  </h1>
+                  {development.shortDescription ? (
+                    <p className="mt-4 max-w-2xl text-lg text-white/95">
+                      {development.shortDescription}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  className="rounded-md bg-white px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-100"
+                  href="#planta"
+                >
+                  Ver planta dos lotes
+                </a>
+                {whatsappDigits ? (
+                  <a
+                    className="rounded-md border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/20"
+                    href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(defaultWaMessage)}`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Falar no WhatsApp
+                  </a>
+                ) : null}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mx-auto max-w-5xl px-6 py-12">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt={`Logo — ${development.name}`}
+                  className="h-16 w-auto max-w-[220px] object-contain sm:h-20"
+                  decoding="async"
+                  src={logoUrl}
+                />
+              ) : null}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-slate-500">
+                  {development.city.name} · {development.city.state}
+                </p>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
+                  {development.name}
+                </h1>
+                {development.shortDescription ? (
+                  <p className="mt-4 max-w-2xl text-lg text-slate-600">
+                    {development.shortDescription}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                className="rounded-md bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+                href="#planta"
+              >
+                Ver planta dos lotes
+              </a>
+              {whatsappDigits ? (
+                <a
+                  className="rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+                  href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(defaultWaMessage)}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Falar no WhatsApp
+                </a>
+              ) : null}
+            </div>
+          </div>
+        )}
       </header>
 
       {development.fullDescription ? (

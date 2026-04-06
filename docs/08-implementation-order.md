@@ -5,7 +5,7 @@
 2. configurar Tailwind
 3. instalar shadcn/ui
 4. configurar Prisma e PostgreSQL
-5. configurar Auth.js
+5. configurar NextAuth v4 (credentials)
 6. criar estrutura base do projeto
 
 ## Fase 1 — Base de domínio

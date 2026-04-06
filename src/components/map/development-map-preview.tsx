@@ -15,7 +15,33 @@ export type MapLotForPreview = {
   areaM2?: string | null;
   estimatedValue?: string | null;
   publicNotes?: string | null;
+  number?: string;
+  blockCode?: string;
 };
+
+function publicStatusLabel(status: string): string {
+  switch (status) {
+    case "AVAILABLE":
+      return "Disponível";
+    case "RESERVED":
+      return "Reservado";
+    case "SOLD":
+      return "Vendido";
+    case "UNAVAILABLE":
+      return "Indisponível";
+    default:
+      return status;
+  }
+}
+
+function formatBrlFromDecimalString(value: string): string {
+  const n = Number(value.replace(",", "."));
+  if (!Number.isFinite(n)) return value;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(n);
+}
 
 function colorForStatus(status: string): string {
   switch (status) {
@@ -156,6 +182,24 @@ export function DevelopmentMapPreview({
   const selected = lots.find((l) => l.id === selectedId);
   const isPublic = variant === "public";
 
+  useEffect(() => {
+    if (!isPublic || !selectedId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isPublic, selectedId]);
+
+  useEffect(() => {
+    if (!isPublic || !selectedId) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isPublic, selectedId]);
+
   return (
     <div className="space-y-4">
       {!isPublic ? (
@@ -228,11 +272,11 @@ export function DevelopmentMapPreview({
         </TransformWrapper>
       </div>
 
-      {selected ? (
+      {!isPublic && selected ? (
         <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
           <p className="font-medium text-slate-900">Lote {selected.code}</p>
           <p className="text-slate-600">
-            Status: {selected.publicStatus}
+            Status: {publicStatusLabel(selected.publicStatus)}
             {selected.areaM2 ? (
               <>
                 {" "}
@@ -242,10 +286,11 @@ export function DevelopmentMapPreview({
             {selected.estimatedValue ? (
               <>
                 {" "}
-                · Valor estimado: R$ {selected.estimatedValue}
+                · Valor estimado:{" "}
+                {formatBrlFromDecimalString(selected.estimatedValue)}
               </>
             ) : null}
-            {!isPublic && selected.geometryRef ? (
+            {selected.geometryRef ? (
               <>
                 {" "}
                 · Ref: <code>{selected.geometryRef}</code>
@@ -255,32 +300,125 @@ export function DevelopmentMapPreview({
           {selected.publicNotes ? (
             <p className="mt-2 text-slate-700">{selected.publicNotes}</p>
           ) : null}
-          {isPublic && whatsappDigits &&
-          selected &&
-          selected.geometryRef ? (
-            <a
-              className="mt-3 inline-flex rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-              href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(
-                whatsappMessageForLot(
-                  developmentName,
-                  cityLabel,
-                  selected,
-                ),
-              )}`}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Tenho interesse neste lote
-            </a>
-          ) : null}
         </div>
-      ) : (
+      ) : !isPublic ? (
         <p className="text-sm text-slate-500">
-          {isPublic
-            ? "Selecione um lote na planta."
-            : "Nenhum lote selecionado. Lotes sem geometryRef não aparecem na legenda de cores."}
+          Nenhum lote selecionado. Lotes sem geometryRef não aparecem na legenda
+          de cores.
         </p>
-      )}
+      ) : null}
+
+      {isPublic && !selected ? (
+        <p className="text-sm text-slate-500">
+          Selecione um lote na planta para ver os detalhes.
+        </p>
+      ) : null}
+
+      {isPublic && selected ? (
+        <div
+          aria-labelledby="lot-modal-title"
+          className="fixed inset-0 z-100 flex items-end justify-center sm:items-center"
+          role="presentation"
+        >
+          <button
+            aria-label="Fechar detalhes do lote"
+            className="absolute inset-0 bg-slate-900/50"
+            type="button"
+            onClick={() => setSelectedId(null)}
+          />
+          <div
+            className="relative z-101 m-0 max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-slate-200 bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl sm:m-4 sm:rounded-2xl"
+            role="dialog"
+            aria-modal="true"
+            id="lot-detail-modal"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3
+                  className="text-lg font-semibold text-slate-900"
+                  id="lot-modal-title"
+                >
+                  Lote {selected.code}
+                </h3>
+                {selected.number ? (
+                  <p className="mt-1 text-sm text-slate-600">
+                    Número: <span className="font-medium">{selected.number}</span>
+                    {selected.blockCode ? (
+                      <>
+                        {" "}
+                        · Quadra:{" "}
+                        <span className="font-medium">{selected.blockCode}</span>
+                      </>
+                    ) : null}
+                  </p>
+                ) : selected.blockCode ? (
+                  <p className="mt-1 text-sm text-slate-600">
+                    Quadra:{" "}
+                    <span className="font-medium">{selected.blockCode}</span>
+                  </p>
+                ) : null}
+              </div>
+              <button
+                className="shrink-0 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                type="button"
+                onClick={() => setSelectedId(null)}
+              >
+                Fechar
+              </button>
+            </div>
+
+            <dl className="mt-4 space-y-3 text-sm">
+              <div>
+                <dt className="text-slate-500">Status</dt>
+                <dd className="font-medium text-slate-900">
+                  {publicStatusLabel(selected.publicStatus)}
+                </dd>
+              </div>
+              {selected.areaM2 ? (
+                <div>
+                  <dt className="text-slate-500">Área</dt>
+                  <dd className="font-medium text-slate-900">
+                    {selected.areaM2} m²
+                  </dd>
+                </div>
+              ) : null}
+              {selected.estimatedValue ? (
+                <div>
+                  <dt className="text-slate-500">Valor estimado</dt>
+                  <dd className="font-medium text-slate-900">
+                    {formatBrlFromDecimalString(selected.estimatedValue)}
+                  </dd>
+                </div>
+              ) : null}
+              {selected.publicNotes ? (
+                <div>
+                  <dt className="text-slate-500">Observações</dt>
+                  <dd className="whitespace-pre-wrap text-slate-800">
+                    {selected.publicNotes}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+
+            {whatsappDigits ? (
+              <a
+                className="mt-6 flex w-full items-center justify-center rounded-md bg-green-600 px-4 py-3 text-sm font-medium text-white hover:bg-green-700"
+                href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(
+                  whatsappMessageForLot(
+                    developmentName,
+                    cityLabel,
+                    selected,
+                  ),
+                )}`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Tenho interesse neste lote
+              </a>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

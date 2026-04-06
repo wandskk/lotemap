@@ -33,7 +33,7 @@ Construir um SaaS multiempresa para loteamentos que permita:
 - UI: `Tailwind CSS` + `shadcn/ui`
 - Banco: `PostgreSQL` + `Prisma`
 - Auth: `NextAuth` (v4, credentials + JWT) — variaveis `NEXTAUTH_URL`, `NEXTAUTH_SECRET` ou `AUTH_SECRET`
-- Forms/validacao: `React Hook Form` + `Zod`
+- Forms/validacao: `React Hook Form` + `Zod` (auth e regras pontuais; formularios admin ainda em HTML + server actions)
 - Mapa: `SVG interativo` + `react-zoom-pan-pinch`
 - Deploy: `Vercel`
 - Storage: `Cloudinary` ou `S3`
@@ -82,10 +82,13 @@ Publica:
 
 Admin:
 - `/admin`
+- `/admin/companies` (superadmin)
+- `/admin/cities`
 - `/admin/developments`
-- `/admin/lots`
 - `/admin/blocks`
+- `/admin/lots` (e `/admin/lots/[lotId]` comprador/histórico)
 - `/admin/users` (gestão de usuários, superadmin)
+- `/admin/login`
 
 ## Plano de execucao ate a conclusao
 
@@ -94,7 +97,7 @@ Admin:
 2. Configurar Tailwind e base visual
 3. Instalar e configurar shadcn/ui
 4. Configurar Prisma e PostgreSQL
-5. Configurar Auth.js
+5. Configurar NextAuth (v4, credentials)
 6. Organizar estrutura de pastas inicial
 
 Entregavel da fase:
@@ -174,7 +177,7 @@ Consideramos o MVP concluido quando:
 
 ## Checklist mestre (acompanhamento)
 
-**Ultima revisao do codigo:** auditoria manual do repositorio (README alinhado ao que existe hoje).
+**Ultima revisao do codigo:** 2026-04 — README + `specs/mvp-checklist.md` sincronizados com o repositorio; `docs/05*` descrevem visao alvo (alguns itens ainda nao implementados).
 
 ### Fases (macro)
 
@@ -182,19 +185,19 @@ Consideramos o MVP concluido quando:
 |------|------|--------|
 | 0 | Setup da fundacao | **Concluida** (dev local, Prisma+PG, Tailwind, auth, proxy Next 16) |
 | 1 | Base de dominio (Prisma) | **Concluida** (schema + migrations + seed) |
-| 2 | Dashboard inicial | **Quase concluida** (CRUD cidades, loteamentos, quadras, lotes; falta refino / usuarios / empresa na UI) |
-| 3 | Planta interativa | **Em andamento** (preview admin com SVG URL + zoom/cores; upload e pagina publica pendentes) |
-| 4 | Landing publica | **Em andamento** (hero, sobre, local, planta, WhatsApp flutuante + CTA por lote) |
+| 2 | Dashboard inicial | **Concluida** (CRUD + `/admin/users`; opcional: tela **Empresas** e métricas na home) |
+| 3 | Planta interativa | **Quase concluida** (preview admin + URL pública; **upload** para storage opcional) |
+| 4 | Landing publica | **Quase concluida** (hero, sobre, local, planta, WhatsApp; **drawer** opcional) |
 | 5 | Dados internos e historico | **Concluida** (comprador + historico no admin; gravacao em edicao de lote e em dados do comprador) |
 | 6 | Polimento | **Em andamento** |
 
 ### Fundacao
 - [x] projeto Next.js + TypeScript (App Router)
 - [x] Tailwind CSS (v4 + `@tailwindcss/postcss`)
-- [ ] **shadcn/ui** (ainda nao instalado — previsto na stack; UI atual e HTML + classes Tailwind)
+- [x] **shadcn/ui** (`npx shadcn init`, estilo `base-nova`, `components.json`; tema em `globals.css`; componentes em `src/components/ui/`)
 - [x] Prisma + PostgreSQL (`prisma.config.ts`, migrations)
 - [x] Prisma Client com **`@prisma/adapter-pg` + `pg`** (requisito Prisma 7)
-- [x] NextAuth v4 (login por credenciais + `SessionProvider` + `getServerSession`)
+- [x] NextAuth v4 (credenciais: **bcrypt** em `User.passwordHash` + fallback bootstrap `ADMIN_EMAIL`/`ADMIN_PASSWORD` se usuário existir sem hash)
 - [x] `NEXTAUTH_URL` configurado (evita erro de callback / CredentialsSignin)
 - [x] Estrutura de pastas base (`src/app`, `src/lib`, `src/services`, etc.)
 - [x] Convencao **`src/proxy.ts`** (substitui `middleware` no Next 16)
@@ -211,7 +214,7 @@ Consideramos o MVP concluido quando:
 - [x] Seed de desenvolvimento (`npm run prisma:seed` + `package.json` → `prisma.seed`)
 
 ### Dominio — telas / fluxos admin (CRUD ou gestao)
-- [ ] **Empresas** (superadmin): sem tela dedicada; empresa criada via seed
+- [x] **Empresas** (`/admin/companies`): CRUD superadmin; remoção bloqueada se houver loteamentos
 - [x] **Usuarios** (`/admin/users`): listagem + CRUD (restrito a **Superadmin**); login do painel segue `ADMIN_EMAIL` no `.env`
 - [x] **Cidades** (`/admin/cities`): CRUD
 - [x] **Loteamentos** (`/admin/developments`): CRUD (empresa + cidade + slug unico por cidade)
@@ -230,7 +233,7 @@ Consideramos o MVP concluido quando:
 - [x] Campo **URL da planta SVG** (`mapSvgUrl`) no CRUD de loteamentos
 - [x] Pagina **`/admin/developments/[id]/map`**: carrega SVG (fetch servidor), zoom/pan (`react-zoom-pan-pinch`), cores por status publico, clique por `geometryRef` (id ou `data-lot-id` no SVG)
 - [ ] Upload de SVG para storage (hoje apenas URL publica)
-- [ ] Reaproveitar o mesmo componente na **landing publica** (Fase 4)
+- [x] Mesmo componente de planta na landing (`DevelopmentMapPreview` `variant="public"`)
 
 ### Publico (`/{city}/{development}`)
 - [x] Rota publica (`src/app/(public)/[city]/[development]/page.tsx`)
@@ -245,16 +248,16 @@ Consideramos o MVP concluido quando:
 
 ### Qualidade
 - [x] Responsividade revisada ponta a ponta (parcial: painel admin — padding mobile, menu com rolagem horizontal, selects de filtro em largura total no mobile)
-- [x] Permissao basica (sessao obrigatoria no admin) — **regra por empresa/usuario ainda nao implementada** (hoje so login bootstrap)
+- [x] Permissao basica (sessao obrigatoria no admin) — **escopo por empresa** para Admin/Gestor (`getAdminDataScope` em loteamentos/quadras/lotes/planta/detalhe do lote); login continua **uma credencial** `.env`; superadmin vê tudo
 - [x] SEO basico na landing (canonical, OG/Twitter, `NEXT_PUBLIC_SITE_URL` / Vercel para URLs absolutas)
 - [x] Mensagens de erro e estados vazios consistentes (componente `AdminCallout` + textos orientando próximo passo)
 - [x] Acessibilidade parcial (skip link na landing publica, foco visivel global, menu admin com `aria-current`, regiao da planta com `aria-label`)
 - [ ] Testes automatizados (nao previstos ainda)
 
 ### Itens fora do checklist original mas importantes
-- [ ] Instalar e padronizar **shadcn/ui** (dependencias + `components.json`)
+- [x] Instalar **shadcn/ui** (dependencias + `components.json`; botões em login e logout como referência)
 - [ ] **Storage** de SVG/banner/logo (Cloudinary/S3) + campos so URL hoje
-- [ ] Alinhar nome da doc: stack diz "Auth.js"; runtime e **NextAuth v4** (documentado acima)
+- [x] Navegação de docs: README e plano de fases usam **NextAuth v4** (não Auth.js v5); `docs/08` alinhado
 
 ## Como vamos executar parte por parte
 
@@ -291,17 +294,12 @@ Regra pratica:
 
 ## Proximos passos recomendados (ordem sugerida)
 
-1. **Instalar shadcn/ui** (padronizar inputs/botões/dialogs) ou **tela `/admin/users`** (listar usuários da empresa) — conforme prioridade de produto
-2. **Fechar Fase 2 — dashboard** (nucleo do CRUD: feito)
-   - Opcional: tela de **usuarios** (`/admin/users`) e **empresas** para multi-tenant real na UI
-3. **Fase 3 — planta** (continuar)
-   - [x] Preview admin + `mapSvgUrl` + zoom/pan + cores
-   - Upload de SVG para storage (opcional) ou manter URL
-4. **Fase 4 — landing publica** (continuar)
-   - [x] Conteudo base + planta + WhatsApp
-   - Refinar layout, imagens (banner/logo), SEO avancado, drawer opcional
-5. ~~**Fase 5 — LotOwnerInfo + LotHistory** no admin~~ (feito)
-6. **Fase 6 — polimento** (responsividade, validacoes, a11y, estados vazios, SEO landing) + instalar **shadcn/ui** se quiser padronizar componentes
+1. **UI admin:** estender **shadcn** (`Input`, `Card`, `Dialog`, `Label`) e substituir formulários longos aos poucos
+2. **Landing:** **drawer/modal** do lote (hoje painel fixo abaixo da planta); usar `bannerUrl` / `logoUrl` no hero quando existirem
+3. **Mídia:** **upload** de SVG/banner/logo (Cloudinary/S3 ou Vercel Blob) em vez de só URL manual
+4. **Qualidade:** **Zod** nos server actions dos CRUDs; mensagens de erro por campo; **testes** (e2e ou integração) nos fluxos críticos
+5. **Segurança / produto:** auditoria de rotas públicas (garantir zero vazamento de dados internos); opcional **recuperação de senha** e política de senha
+6. **Cidades (opcional):** escopo por empresa ou catálogo global documentado (hoje qualquer usuário com acesso ao admin edita cidades)
 
 ## Como rodar localmente (base atual)
 

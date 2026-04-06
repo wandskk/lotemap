@@ -7,7 +7,7 @@
 - shadcn/ui
 - Prisma
 - PostgreSQL
-- Auth.js
+- NextAuth v4 (credentials + JWT)
 - Zod
 - React Hook Form
 - react-zoom-pan-pinch
@@ -24,9 +24,11 @@
 
 ## Rotas admin
 - `/admin`
+- `/admin/login`
+- `/admin/cities`
 - `/admin/developments`
-- `/admin/lots`
 - `/admin/blocks`
+- `/admin/lots` e `/admin/lots/[lotId]`
 - `/admin/users`
 
 ## Convenções

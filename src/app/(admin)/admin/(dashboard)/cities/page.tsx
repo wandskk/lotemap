@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { AdminCallout } from "@/components/admin/admin-callout";
+import { NameSlugFields } from "@/components/admin/name-slug-fields";
 import { prisma } from "@/lib/prisma";
 import { toSlug } from "@/lib/slug";
 
@@ -59,23 +60,25 @@ export default async function CitiesPage() {
       <div className="rounded-lg border border-slate-200 bg-white p-5">
         <h2 className="text-lg font-medium">Nova cidade</h2>
         <form action={createCity} className="mt-4 grid gap-3 sm:grid-cols-4">
-          <input
-            className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
-            name="name"
-            placeholder="Nome (ex.: Goiania)"
-            required
-          />
-          <input
-            className="rounded-md border border-slate-300 px-3 py-2"
-            maxLength={2}
-            name="state"
-            placeholder="UF (ex.: GO)"
-            required
-          />
-          <input
-            className="rounded-md border border-slate-300 px-3 py-2"
-            name="slug"
-            placeholder="Slug (opcional)"
+          <NameSlugFields
+            autoSyncSlug
+            betweenTitleAndSlug={
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="font-medium text-slate-700">UF</span>
+                <input
+                  className="rounded-md border border-slate-300 px-3 py-2"
+                  maxLength={2}
+                  name="state"
+                  placeholder="UF (ex.: GO)"
+                  required
+                />
+              </label>
+            }
+            nameLabel="Nome"
+            nameLabelClassName="sm:col-span-2"
+            namePlaceholder="Nome (ex.: Goiania)"
+            slugLabel="Slug (opcional)"
+            slugPlaceholder="gerado a partir do nome"
           />
           <button
             className="rounded-md bg-slate-900 px-4 py-2 font-medium text-white sm:col-span-4 sm:w-max"
@@ -105,24 +108,27 @@ export default async function CitiesPage() {
                 >
                   <form action={updateCity} className="grid gap-3 sm:grid-cols-4">
                     <input type="hidden" name="id" value={city.id} />
-                    <input
-                      className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
-                      defaultValue={city.name}
-                      name="name"
-                      required
-                    />
-                    <input
-                      className="rounded-md border border-slate-300 px-3 py-2"
-                      defaultValue={city.state}
-                      maxLength={2}
-                      name="state"
-                      required
-                    />
-                    <input
-                      className="rounded-md border border-slate-300 px-3 py-2"
-                      defaultValue={city.slug}
-                      name="slug"
-                      required
+                    <NameSlugFields
+                      key={city.id}
+                      autoSyncSlug={false}
+                      betweenTitleAndSlug={
+                        <label className="flex flex-col gap-1 text-sm">
+                          <span className="font-medium text-slate-700">UF</span>
+                          <input
+                            className="rounded-md border border-slate-300 px-3 py-2"
+                            defaultValue={city.state}
+                            maxLength={2}
+                            name="state"
+                            required
+                          />
+                        </label>
+                      }
+                      defaultName={city.name}
+                      defaultSlug={city.slug}
+                      nameLabel="Nome"
+                      nameLabelClassName="sm:col-span-2"
+                      slugLabel="Slug"
+                      slugRequired
                     />
                     <button
                       className="rounded-md border border-slate-300 px-4 py-2 text-sm sm:w-max"

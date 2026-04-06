@@ -1,0 +1,421 @@
+<svg width="2048" height="914" viewBox="0 0 2048 914" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <style>
+    .bg { fill: #495124; }
+    .grass { fill: #4d5926; }
+    .road { fill: #b9b8be; }
+    .road-edge { stroke: #cbcad0; stroke-width: 2; fill: none; }
+    .stream { fill: none; stroke: #4d8a8e; stroke-width: 14; opacity: .9; }
+    .lot { fill: rgba(255,255,255,0.03); stroke: #ffffff; stroke-width: 2; }
+    .area-zone { fill: rgba(255,255,255,0.02); stroke: #ffffff; stroke-width: 2; }
+    .road-name { fill: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 26px; font-weight: 700; letter-spacing: .5px; }
+    .road-name-small { fill: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 22px; font-weight: 700; }
+    .area-text { fill: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 700; }
+    .small-text { fill: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: 700; }
+    .num-circle { fill: #ffffff; stroke: #222; stroke-width: 1.5; }
+    .num-text { fill: #111; font-family: Arial, Helvetica, sans-serif; font-size: 17px; font-weight: 700; }
+    .north { fill: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 700; }
+  </style>
+</defs>
+
+<rect class="bg" x="0" y="0" width="2048" height="914"/>
+
+
+<rect x="0" y="0" width="90" height="914" fill="#5b5b5b"/>
+<text x="58" y="560" transform="rotate(-90 58 560)" class="road-name">RUA JOSÉ HENRIQUE MEZZARI</text>
+
+<rect x="0" y="235" width="2048" height="88" class="road"/>
+<rect x="677" y="0" width="89" height="914" class="road"/>
+<rect x="1322" y="0" width="98" height="914" class="road"/>
+<rect x="655" y="567" width="765" height="88" class="road"/>
+
+<circle cx="420" cy="567" r="43" class="road"/>
+<circle cx="676" cy="611" r="43" class="road"/>
+
+
+<path class="stream" d="M 705 0 C 705 100, 710 150, 698 220 C 682 310, 675 390, 670 470 C 664 570, 595 635, 530 720 C 470 800, 445 860, 410 914"/>
+
+
+<text x="905" y="286" class="road-name">RUA PEDRO MEZARI</text>
+<text x="1393" y="545" transform="rotate(-90 1393 545)" class="road-name">RUA ARGENTINA</text>
+<text x="860" y="611" class="road-name">RUA ALBERTO TAUFENBACK</text>
+
+
+<g id="compass" transform="translate(1990,45)">
+  <text x="0" y="-18" text-anchor="middle" class="north">N</text>
+  <circle cx="0" cy="0" r="18" fill="none" stroke="#fff" stroke-width="1.5"/>
+  <line x1="0" y1="-24" x2="0" y2="24" stroke="#fff" stroke-width="1.5"/>
+  <line x1="-24" y1="0" x2="24" y2="0" stroke="#fff" stroke-width="1.5"/>
+  <line x1="-17" y1="-17" x2="17" y2="17" stroke="#fff" stroke-width="1"/>
+  <line x1="17" y1="-17" x2="-17" y2="17" stroke="#fff" stroke-width="1"/>
+</g>
+
+
+    <g id="Q06-L05" data-lot-id="Q06-L05">
+      <rect x="95" y="46" width="92" height="144" class="lot"/>
+      <circle cx="141.0" cy="102.0" r="13" class="num-circle"/><text x="141.0" y="108.0" class="num-text" text-anchor="middle">5</text>
+      <text x="141.0" y="136.0" class="area-text" text-anchor="middle">ÁREA 432,00m²</text>
+    </g>
+
+    <g id="Q06-L04" data-lot-id="Q06-L04">
+      <rect x="187" y="46" width="92" height="144" class="lot"/>
+      <circle cx="233.0" cy="102.0" r="13" class="num-circle"/><text x="233.0" y="108.0" class="num-text" text-anchor="middle">4</text>
+      <text x="233.0" y="136.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q06-L03" data-lot-id="Q06-L03">
+      <rect x="279" y="46" width="92" height="144" class="lot"/>
+      <circle cx="325.0" cy="102.0" r="13" class="num-circle"/><text x="325.0" y="108.0" class="num-text" text-anchor="middle">3</text>
+      <text x="325.0" y="136.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q06-L02" data-lot-id="Q06-L02">
+      <rect x="371" y="46" width="92" height="144" class="lot"/>
+      <circle cx="417.0" cy="102.0" r="13" class="num-circle"/><text x="417.0" y="108.0" class="num-text" text-anchor="middle">2</text>
+      <text x="417.0" y="136.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q06-L01" data-lot-id="Q06-L01">
+      <rect x="463" y="46" width="92" height="144" class="lot"/>
+      <circle cx="509.0" cy="102.0" r="13" class="num-circle"/><text x="509.0" y="108.0" class="num-text" text-anchor="middle">1</text>
+      <text x="509.0" y="136.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+<g id="Q06-AREA-VERDE-01">
+  <polygon points="555,45 645,45 645,190 520,190 520,120" class="area-zone"/>
+  <text x="590" y="110" class="area-text" text-anchor="middle">ÁREA</text>
+  <text x="590" y="137" class="area-text" text-anchor="middle">VERDE</text>
+  <text x="590" y="164" class="area-text" text-anchor="middle">01</text>
+  <text x="590" y="188" class="small-text" text-anchor="middle">746,10m²</text>
+</g>
+<circle cx="340" cy="40" r="14" class="num-circle"/><text x="340" y="46" text-anchor="middle" class="num-text">06</text>
+
+
+    <g id="Q04-L06" data-lot-id="Q04-L06">
+      <rect x="766" y="45" width="91" height="145" class="lot"/>
+      <circle cx="811.5" cy="101.5" r="13" class="num-circle"/><text x="811.5" y="107.5" class="num-text" text-anchor="middle">6</text>
+      
+    </g>
+
+    <g id="Q04-L05" data-lot-id="Q04-L05">
+      <rect x="857" y="45" width="91" height="145" class="lot"/>
+      <circle cx="902.5" cy="101.5" r="13" class="num-circle"/><text x="902.5" y="107.5" class="num-text" text-anchor="middle">5</text>
+      
+    </g>
+
+    <g id="Q04-L04" data-lot-id="Q04-L04">
+      <rect x="948" y="45" width="91" height="145" class="lot"/>
+      <circle cx="993.5" cy="101.5" r="13" class="num-circle"/><text x="993.5" y="107.5" class="num-text" text-anchor="middle">4</text>
+      <text x="993.5" y="135.5" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q04-L03" data-lot-id="Q04-L03">
+      <rect x="1039" y="45" width="91" height="145" class="lot"/>
+      <circle cx="1084.5" cy="101.5" r="13" class="num-circle"/><text x="1084.5" y="107.5" class="num-text" text-anchor="middle">3</text>
+      <text x="1084.5" y="135.5" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q04-L02" data-lot-id="Q04-L02">
+      <rect x="1130" y="45" width="91" height="145" class="lot"/>
+      <circle cx="1175.5" cy="101.5" r="13" class="num-circle"/><text x="1175.5" y="107.5" class="num-text" text-anchor="middle">2</text>
+      <text x="1175.5" y="135.5" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q04-L01" data-lot-id="Q04-L01">
+      <rect x="1221" y="45" width="91" height="145" class="lot"/>
+      <circle cx="1266.5" cy="101.5" r="13" class="num-circle"/><text x="1266.5" y="107.5" class="num-text" text-anchor="middle">1</text>
+      <text x="1266.5" y="135.5" class="area-text" text-anchor="middle">ÁREA 432,00m²</text>
+    </g>
+<circle cx="1028" cy="42" r="14" class="num-circle"/><text x="1028" y="48" text-anchor="middle" class="num-text">04</text>
+
+    <g id="Q01-L05" data-lot-id="Q01-L05">
+      <rect x="1420" y="43" width="98" height="146" class="lot"/>
+      <circle cx="1469.0" cy="100.0" r="13" class="num-circle"/><text x="1469.0" y="106.0" class="num-text" text-anchor="middle">5</text>
+      <text x="1469.0" y="134.0" class="area-text" text-anchor="middle">ÁREA 542,65m²</text>
+    </g>
+
+    <g id="Q01-L04" data-lot-id="Q01-L04">
+      <rect x="1518" y="43" width="98" height="146" class="lot"/>
+      <circle cx="1567.0" cy="100.0" r="13" class="num-circle"/><text x="1567.0" y="106.0" class="num-text" text-anchor="middle">4</text>
+      <text x="1567.0" y="134.0" class="area-text" text-anchor="middle">ÁREA 400,00m²</text>
+    </g>
+
+    <g id="Q01-L03" data-lot-id="Q01-L03">
+      <rect x="1616" y="43" width="98" height="146" class="lot"/>
+      <circle cx="1665.0" cy="100.0" r="13" class="num-circle"/><text x="1665.0" y="106.0" class="num-text" text-anchor="middle">3</text>
+      <text x="1665.0" y="134.0" class="area-text" text-anchor="middle">ÁREA 400,00m²</text>
+    </g>
+
+    <g id="Q01-L02" data-lot-id="Q01-L02">
+      <rect x="1714" y="43" width="98" height="146" class="lot"/>
+      <circle cx="1763.0" cy="100.0" r="13" class="num-circle"/><text x="1763.0" y="106.0" class="num-text" text-anchor="middle">2</text>
+      
+    </g>
+
+    <g id="Q01-L01" data-lot-id="Q01-L01">
+      <rect x="1812" y="43" width="98" height="146" class="lot"/>
+      <circle cx="1861.0" cy="100.0" r="13" class="num-circle"/><text x="1861.0" y="106.0" class="num-text" text-anchor="middle">1</text>
+      
+    </g>
+<circle cx="1693" cy="39" r="14" class="num-circle"/><text x="1693" y="45" text-anchor="middle" class="num-text">01</text>
+
+    <g id="Q08-L03" data-lot-id="Q08-L03">
+      <rect x="89" y="327" width="104" height="159" class="lot"/>
+      <circle cx="141.0" cy="390.5" r="13" class="num-circle"/><text x="141.0" y="396.5" class="num-text" text-anchor="middle">03</text>
+      
+    </g>
+
+    <g id="Q08-L02" data-lot-id="Q08-L02">
+      <rect x="193" y="327" width="103" height="159" class="lot"/>
+      <circle cx="244.5" cy="390.5" r="13" class="num-circle"/><text x="244.5" y="396.5" class="num-text" text-anchor="middle">02</text>
+      
+    </g>
+
+<g id="Q08-L01">
+<polygon points="296,327 400,327 400,486 296,486" class="lot"/>
+<text x="348" y="402" class="num-text" text-anchor="middle">01</text>
+<circle cx="348" cy="381" r="13" class="num-circle"/>
+</g>
+
+    <g id="Q08-L04" data-lot-id="Q08-L04">
+      <rect x="89" y="486" width="123" height="103" class="lot"/>
+      <circle cx="150.5" cy="521.5" r="13" class="num-circle"/><text x="150.5" y="527.5" class="num-text" text-anchor="middle">04</text>
+      
+    </g>
+
+    <g id="Q08-L05" data-lot-id="Q08-L05">
+      <rect x="212" y="486" width="188" height="103" class="lot"/>
+      <circle cx="306.0" cy="521.5" r="13" class="num-circle"/><text x="306.0" y="527.5" class="num-text" text-anchor="middle">05</text>
+      
+    </g>
+
+    <g id="Q08-L06" data-lot-id="Q08-L06">
+      <rect x="89" y="589" width="141" height="113" class="lot"/>
+      <circle cx="159.5" cy="629.5" r="13" class="num-circle"/><text x="159.5" y="635.5" class="num-text" text-anchor="middle">06</text>
+      
+    </g>
+
+    <g id="Q08-L07" data-lot-id="Q08-L07">
+      <rect x="230" y="589" width="170" height="113" class="lot"/>
+      <circle cx="315.0" cy="629.5" r="13" class="num-circle"/><text x="315.0" y="635.5" class="num-text" text-anchor="middle">07</text>
+      <text x="315.0" y="663.5" class="area-text" text-anchor="middle">ÁREA 385,40m²</text>
+    </g>
+<circle cx="228" cy="488" r="14" class="num-circle"/><text x="228" y="494" text-anchor="middle" class="num-text">08</text>
+
+<g id="Q07-L01">
+  <polygon points="445,325 620,325 605,403 445,403" class="lot"/>
+  <circle cx="478" cy="371" r="13" class="num-circle"/><text x="478" y="377" text-anchor="middle" class="num-text">01</text>
+  <text x="547" y="362" class="area-text" text-anchor="middle">ÁREA</text>
+  <text x="547" y="388" class="area-text" text-anchor="middle">432,00m²</text>
+</g>
+<g id="Q07-L02">
+  <polygon points="445,403 605,403 594,486 445,486" class="lot"/>
+  <circle cx="478" cy="446" r="13" class="num-circle"/><text x="478" y="452" text-anchor="middle" class="num-text">02</text>
+  <text x="547" y="440" class="area-text" text-anchor="middle">ÁREA</text>
+  <text x="547" y="466" class="area-text" text-anchor="middle">360,00m²</text>
+</g>
+<g id="Q07-L03">
+  <polygon points="445,486 594,486 592,568 445,568" class="lot"/>
+  <circle cx="478" cy="530" r="13" class="num-circle"/><text x="478" y="536" text-anchor="middle" class="num-text">03</text>
+  <text x="547" y="520" class="area-text" text-anchor="middle">ÁREA</text>
+  <text x="547" y="546" class="area-text" text-anchor="middle">360,00m²</text>
+</g>
+<circle cx="585" cy="399" r="14" class="num-circle"/><text x="585" y="405" text-anchor="middle" class="num-text">07</text>
+
+
+    <g id="Q05-TOP-12" data-lot-id="Q05-TOP-12">
+      <rect x="698" y="323" width="93" height="130" class="lot"/>
+      <circle cx="744.5" cy="372.0" r="13" class="num-circle"/><text x="744.5" y="378.0" class="num-text" text-anchor="middle">12</text>
+      <text x="744.5" y="406.0" class="area-text" text-anchor="middle">ÁREA 391,88m²</text>
+    </g>
+
+    <g id="Q05-TOP-10" data-lot-id="Q05-TOP-10">
+      <rect x="791" y="323" width="93" height="130" class="lot"/>
+      <circle cx="837.5" cy="372.0" r="13" class="num-circle"/><text x="837.5" y="378.0" class="num-text" text-anchor="middle">10</text>
+      <text x="837.5" y="406.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-TOP-8" data-lot-id="Q05-TOP-8">
+      <rect x="884" y="323" width="93" height="130" class="lot"/>
+      <circle cx="930.5" cy="372.0" r="13" class="num-circle"/><text x="930.5" y="378.0" class="num-text" text-anchor="middle">8</text>
+      <text x="930.5" y="406.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-TOP-6" data-lot-id="Q05-TOP-6">
+      <rect x="977" y="323" width="93" height="130" class="lot"/>
+      <circle cx="1023.5" cy="372.0" r="13" class="num-circle"/><text x="1023.5" y="378.0" class="num-text" text-anchor="middle">6</text>
+      <text x="1023.5" y="406.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-TOP-4" data-lot-id="Q05-TOP-4">
+      <rect x="1070" y="323" width="93" height="130" class="lot"/>
+      <circle cx="1116.5" cy="372.0" r="13" class="num-circle"/><text x="1116.5" y="378.0" class="num-text" text-anchor="middle">4</text>
+      <text x="1116.5" y="406.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-TOP-1" data-lot-id="Q05-TOP-1">
+      <rect x="1163" y="323" width="93" height="130" class="lot"/>
+      <circle cx="1209.5" cy="372.0" r="13" class="num-circle"/><text x="1209.5" y="378.0" class="num-text" text-anchor="middle">1</text>
+      <text x="1209.5" y="406.0" class="area-text" text-anchor="middle">ÁREA 432,00m²</text>
+    </g>
+
+    <g id="Q05-BOT-13" data-lot-id="Q05-BOT-13">
+      <rect x="698" y="453" width="93" height="130" class="lot"/>
+      <circle cx="744.5" cy="502.0" r="13" class="num-circle"/><text x="744.5" y="508.0" class="num-text" text-anchor="middle">13</text>
+      <text x="744.5" y="536.0" class="area-text" text-anchor="middle">ÁREA 405,50m²</text>
+    </g>
+
+    <g id="Q05-BOT-11" data-lot-id="Q05-BOT-11">
+      <rect x="791" y="453" width="93" height="130" class="lot"/>
+      <circle cx="837.5" cy="502.0" r="13" class="num-circle"/><text x="837.5" y="508.0" class="num-text" text-anchor="middle">11</text>
+      <text x="837.5" y="536.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-BOT-9" data-lot-id="Q05-BOT-9">
+      <rect x="884" y="453" width="93" height="130" class="lot"/>
+      <circle cx="930.5" cy="502.0" r="13" class="num-circle"/><text x="930.5" y="508.0" class="num-text" text-anchor="middle">9</text>
+      <text x="930.5" y="536.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-BOT-7" data-lot-id="Q05-BOT-7">
+      <rect x="977" y="453" width="93" height="130" class="lot"/>
+      <circle cx="1023.5" cy="502.0" r="13" class="num-circle"/><text x="1023.5" y="508.0" class="num-text" text-anchor="middle">7</text>
+      <text x="1023.5" y="536.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-BOT-5" data-lot-id="Q05-BOT-5">
+      <rect x="1070" y="453" width="93" height="130" class="lot"/>
+      <circle cx="1116.5" cy="502.0" r="13" class="num-circle"/><text x="1116.5" y="508.0" class="num-text" text-anchor="middle">5</text>
+      <text x="1116.5" y="536.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-BOT-3" data-lot-id="Q05-BOT-3">
+      <rect x="1163" y="453" width="93" height="130" class="lot"/>
+      <circle cx="1209.5" cy="502.0" r="13" class="num-circle"/><text x="1209.5" y="508.0" class="num-text" text-anchor="middle">3</text>
+      <text x="1209.5" y="536.0" class="area-text" text-anchor="middle">ÁREA 432,00m²</text>
+    </g>
+
+    <g id="Q05-R-02" data-lot-id="Q05-R-02">
+      <rect x="1216" y="388" width="106" height="98" class="lot"/>
+      <circle cx="1269.0" cy="421.0" r="13" class="num-circle"/><text x="1269.0" y="427.0" class="num-text" text-anchor="middle">02</text>
+      <text x="1269.0" y="455.0" class="area-text" text-anchor="middle">ÁREA 360,00m²</text>
+    </g>
+
+    <g id="Q05-R-03" data-lot-id="Q05-R-03">
+      <rect x="1216" y="486" width="106" height="97" class="lot"/>
+      <circle cx="1269.0" cy="518.5" r="13" class="num-circle"/><text x="1269.0" y="524.5" class="num-text" text-anchor="middle">03</text>
+      <text x="1269.0" y="552.5" class="area-text" text-anchor="middle">ÁREA 432,00m²</text>
+    </g>
+<circle cx="1018" cy="453" r="14" class="num-circle"/><text x="1018" y="459" text-anchor="middle" class="num-text">05</text>
+
+    <g id="Q02-L09" data-lot-id="Q02-L09">
+      <rect x="1420" y="325" width="108" height="100" class="lot"/>
+      <circle cx="1474.0" cy="359.0" r="13" class="num-circle"/><text x="1474.0" y="365.0" class="num-text" text-anchor="middle">09</text>
+      <text x="1474.0" y="393.0" class="area-text" text-anchor="middle">ÁREA 463,67m²</text>
+    </g>
+
+    <g id="Q02-L10" data-lot-id="Q02-L10">
+      <rect x="1420" y="425" width="108" height="100" class="lot"/>
+      <circle cx="1474.0" cy="459.0" r="13" class="num-circle"/><text x="1474.0" y="465.0" class="num-text" text-anchor="middle">10</text>
+      <text x="1474.0" y="493.0" class="area-text" text-anchor="middle">ÁREA 390,65m²</text>
+    </g>
+
+    <g id="Q02-L11" data-lot-id="Q02-L11">
+      <rect x="1420" y="525" width="108" height="98" class="lot"/>
+      <circle cx="1474.0" cy="558.0" r="13" class="num-circle"/><text x="1474.0" y="564.0" class="num-text" text-anchor="middle">11</text>
+      <text x="1474.0" y="592.0" class="area-text" text-anchor="middle">ÁREA 461,68m²</text>
+    </g>
+
+    <g id="Q02-T-7" data-lot-id="Q02-T-7">
+      <rect x="1528" y="325" width="91" height="149" class="lot"/>
+      <circle cx="1573.5" cy="383.5" r="13" class="num-circle"/><text x="1573.5" y="389.5" class="num-text" text-anchor="middle">7</text>
+      <text x="1573.5" y="417.5" class="area-text" text-anchor="middle">ÁREA 370,00m²</text>
+    </g>
+
+    <g id="Q02-T-5" data-lot-id="Q02-T-5">
+      <rect x="1619" y="325" width="91" height="149" class="lot"/>
+      <circle cx="1664.5" cy="383.5" r="13" class="num-circle"/><text x="1664.5" y="389.5" class="num-text" text-anchor="middle">5</text>
+      <text x="1664.5" y="417.5" class="area-text" text-anchor="middle">ÁREA 370,00m²</text>
+    </g>
+
+    <g id="Q02-T-3" data-lot-id="Q02-T-3">
+      <rect x="1710" y="325" width="91" height="149" class="lot"/>
+      <circle cx="1755.5" cy="383.5" r="13" class="num-circle"/><text x="1755.5" y="389.5" class="num-text" text-anchor="middle">3</text>
+      
+    </g>
+
+    <g id="Q02-T-1" data-lot-id="Q02-T-1">
+      <rect x="1801" y="325" width="91" height="149" class="lot"/>
+      <circle cx="1846.5" cy="383.5" r="13" class="num-circle"/><text x="1846.5" y="389.5" class="num-text" text-anchor="middle">1</text>
+      
+    </g>
+
+    <g id="Q02-B-8" data-lot-id="Q02-B-8">
+      <rect x="1528" y="474" width="91" height="149" class="lot"/>
+      <circle cx="1573.5" cy="532.5" r="13" class="num-circle"/><text x="1573.5" y="538.5" class="num-text" text-anchor="middle">8</text>
+      <text x="1573.5" y="566.5" class="area-text" text-anchor="middle">ÁREA 370,00m²</text>
+    </g>
+
+    <g id="Q02-B-6" data-lot-id="Q02-B-6">
+      <rect x="1619" y="474" width="91" height="149" class="lot"/>
+      <circle cx="1664.5" cy="532.5" r="13" class="num-circle"/><text x="1664.5" y="538.5" class="num-text" text-anchor="middle">6</text>
+      <text x="1664.5" y="566.5" class="area-text" text-anchor="middle">ÁREA 370,00m²</text>
+    </g>
+
+    <g id="Q02-B-4" data-lot-id="Q02-B-4">
+      <rect x="1710" y="474" width="91" height="149" class="lot"/>
+      <circle cx="1755.5" cy="532.5" r="13" class="num-circle"/><text x="1755.5" y="538.5" class="num-text" text-anchor="middle">4</text>
+      
+    </g>
+
+    <g id="Q02-B-2" data-lot-id="Q02-B-2">
+      <rect x="1801" y="474" width="91" height="149" class="lot"/>
+      <circle cx="1846.5" cy="532.5" r="13" class="num-circle"/><text x="1846.5" y="538.5" class="num-text" text-anchor="middle">2</text>
+      
+    </g>
+<circle cx="1762" cy="452" r="14" class="num-circle"/><text x="1762" y="458" text-anchor="middle" class="num-text">02</text>
+
+    <g id="Q03-L05" data-lot-id="Q03-L05">
+      <rect x="1420" y="720" width="97" height="127" class="lot"/>
+      <circle cx="1468.5" cy="767.5" r="13" class="num-circle"/><text x="1468.5" y="773.5" class="num-text" text-anchor="middle">5</text>
+      <text x="1468.5" y="801.5" class="area-text" text-anchor="middle">ÁREA 533,37m²</text>
+    </g>
+
+    <g id="Q03-L04" data-lot-id="Q03-L04">
+      <rect x="1517" y="720" width="97" height="127" class="lot"/>
+      <circle cx="1565.5" cy="767.5" r="13" class="num-circle"/><text x="1565.5" y="773.5" class="num-text" text-anchor="middle">4</text>
+      <text x="1565.5" y="801.5" class="area-text" text-anchor="middle">ÁREA 400,00m²</text>
+    </g>
+
+    <g id="Q03-L03" data-lot-id="Q03-L03">
+      <rect x="1614" y="720" width="97" height="127" class="lot"/>
+      <circle cx="1662.5" cy="767.5" r="13" class="num-circle"/><text x="1662.5" y="773.5" class="num-text" text-anchor="middle">3</text>
+      <text x="1662.5" y="801.5" class="area-text" text-anchor="middle">ÁREA 400,00m²</text>
+    </g>
+
+    <g id="Q03-L02" data-lot-id="Q03-L02">
+      <rect x="1711" y="720" width="97" height="127" class="lot"/>
+      <circle cx="1759.5" cy="767.5" r="13" class="num-circle"/><text x="1759.5" y="773.5" class="num-text" text-anchor="middle">2</text>
+      
+    </g>
+
+    <g id="Q03-L01" data-lot-id="Q03-L01">
+      <rect x="1808" y="720" width="97" height="127" class="lot"/>
+      <circle cx="1856.5" cy="767.5" r="13" class="num-circle"/><text x="1856.5" y="773.5" class="num-text" text-anchor="middle">1</text>
+      
+    </g>
+<circle cx="1762" cy="846" r="14" class="num-circle"/><text x="1762" y="852" text-anchor="middle" class="num-text">03</text>
+
+<g id="AREA-VERDE-02">
+  <polygon points="89,705 393,705 393,847 89,847" class="area-zone"/>
+  <text x="180" y="762" class="area-text" text-anchor="middle">ÁREA VERDE</text>
+  <text x="180" y="790" class="area-text" text-anchor="middle">02</text>
+  <text x="180" y="818" class="small-text" text-anchor="middle">3.855,70m²</text>
+</g>
+
+<g id="AUP">
+  <polygon points="385,830 1322,830 1322,914 300,914 300,830" class="area-zone"/>
+  <text x="1030" y="765" class="area-text" text-anchor="middle">A.U.P: 2.674,85m²</text>
+</g>
+
+</svg>

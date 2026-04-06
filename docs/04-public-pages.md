@@ -1,5 +1,10 @@
 # Landing Page Pública por Loteamento
 
+## Estado da implementação (snapshot)
+
+- **Implementado:** rota dinâmica, hero, sobre, localização, planta (`DevelopmentMapPreview`), painel do lote abaixo da planta, WhatsApp flutuante + CTA por lote, metadados SEO básicos.
+- **Pendente / opcional:** modal ou **drawer** dedicado (hoje o detalhe do lote é um bloco sob a planta); seções extras (ex.: diferenciais); imagens banner/logo se os campos forem preenchidos.
+
 ## Estrutura recomendada
 
 1. Hero

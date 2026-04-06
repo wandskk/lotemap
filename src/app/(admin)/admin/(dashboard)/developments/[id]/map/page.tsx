@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { DevelopmentMapPreview } from "@/components/map/development-map-preview";
 import { fetchSvgMarkup, resolveAbsoluteSvgUrl } from "@/lib/fetch-svg";
+import {
+  assertDevelopmentAccessible,
+  getAdminDataScope,
+} from "@/lib/admin-scope";
 import { prisma } from "@/lib/prisma";
 import { getRequestOrigin } from "@/lib/request-origin";
 
@@ -11,6 +15,14 @@ type PageProps = {
 
 export default async function DevelopmentMapPage({ params }: PageProps) {
   const { id } = await params;
+
+  const scope = await getAdminDataScope();
+  if (scope.kind === "blocked") {
+    redirect("/admin/developments");
+  }
+  if (!(await assertDevelopmentAccessible(id, scope))) {
+    notFound();
+  }
 
   const development = await prisma.development.findUnique({
     where: { id },

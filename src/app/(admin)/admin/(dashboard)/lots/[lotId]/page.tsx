@@ -2,6 +2,10 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
+import {
+  assertLotAccessible,
+  getAdminDataScope,
+} from "@/lib/admin-scope";
 import { prisma } from "@/lib/prisma";
 import { getCurrentDbUserId } from "@/lib/current-user";
 import { createLotHistoryEntry } from "@/server/lot-history";
@@ -86,6 +90,14 @@ export default async function LotDetailPage({ params, searchParams }: PageProps)
     notFound();
   }
 
+  const scope = await getAdminDataScope();
+  if (scope.kind === "blocked") {
+    redirect("/admin/lots");
+  }
+  if (!(await assertLotAccessible(lotId, scope))) {
+    notFound();
+  }
+
   const history = await prisma.lotHistory.findMany({
     where: { lotId },
     orderBy: { createdAt: "desc" },
@@ -97,6 +109,10 @@ export default async function LotDetailPage({ params, searchParams }: PageProps)
 
   async function saveOwnerInfo(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+    if (!(await assertLotAccessible(lotId, scope))) return;
+
     const fromDev = String(formData.get("fromDev") ?? "");
     const fromBlock = String(formData.get("fromBlock") ?? "");
     const back = `/admin/lots/${lotId}?dev=${encodeURIComponent(fromDev)}&block=${encodeURIComponent(fromBlock)}`;

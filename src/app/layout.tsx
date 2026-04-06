@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { Geist } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { resolveMetadataBase } from "@/lib/site-url";
-import "./globals.css";
-import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import "./globals.css";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 const metadataBase = resolveMetadataBase();
 

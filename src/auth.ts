@@ -1,6 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/password";
 
 const signInSchema = z.object({
   email: z.string().email(),
@@ -34,13 +36,50 @@ export const authOptions: NextAuthOptions = {
         });
         if (!parsed.success) return null;
 
-        if (!adminEmail || !adminPassword) return null;
+        const emailLower = parsed.data.email.toLowerCase();
 
-        const emailOk =
-          parsed.data.email.toLowerCase() === adminEmail.toLowerCase();
-        const passwordOk = parsed.data.password === adminPassword;
+        const dbUser = await prisma.user.findUnique({
+          where: { email: emailLower },
+        });
 
-        if (emailOk && passwordOk) {
+        if (dbUser) {
+          if (!dbUser.active) return null;
+
+          if (dbUser.passwordHash) {
+            const ok = await verifyPassword(
+              parsed.data.password,
+              dbUser.passwordHash,
+            );
+            if (!ok) return null;
+            return {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name,
+            };
+          }
+
+          if (
+            adminEmail &&
+            adminPassword &&
+            emailLower === adminEmail.toLowerCase() &&
+            parsed.data.password === adminPassword
+          ) {
+            return {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name,
+            };
+          }
+
+          return null;
+        }
+
+        if (
+          adminEmail &&
+          adminPassword &&
+          emailLower === adminEmail.toLowerCase() &&
+          parsed.data.password === adminPassword
+        ) {
           return {
             id: "bootstrap-admin",
             email: parsed.data.email,
@@ -60,6 +99,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.email = user.email;
         token.name = user.name;
+        token.sub = user.id;
       }
       return token;
     },

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Prisma, UserRole } from "@prisma/client";
 import { AdminCallout } from "@/components/admin/admin-callout";
 import { getCurrentDbUser, isSuperAdmin } from "@/lib/current-user";
+import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
 const ROLE_OPTIONS: UserRole[] = [
@@ -57,7 +58,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     );
   }
 
-  const [users, companies] = await Promise.all([
+  const [userRows, companies] = await Promise.all([
     prisma.user.findMany({
       include: { company: true },
       orderBy: [{ active: "desc" }, { email: "asc" }],
@@ -67,6 +68,11 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
       orderBy: { name: "asc" },
     }),
   ]);
+
+  const users = userRows.map(({ passwordHash: _ph, ...rest }) => ({
+    ...rest,
+    hasPassword: !!_ph,
+  }));
 
   async function createUser(formData: FormData) {
     "use server";
@@ -79,20 +85,29 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     const companyRaw = String(formData.get("companyId") ?? "").trim();
     const companyId = companyRaw || null;
     const active = formData.get("active") === "on";
+    const passwordRaw = String(formData.get("password") ?? "").trim();
 
     if (!name || !email) {
       redirect("/admin/users?error=invalid");
     }
     if (!ROLE_OPTIONS.includes(role)) return;
+    if (passwordRaw.length < 6) {
+      redirect("/admin/users?error=password_weak");
+    }
+
+    const passwordHash = await hashPassword(passwordRaw);
 
     try {
       await prisma.user.create({
         data: {
           name,
           email,
+          passwordHash,
           role,
-          companyId,
           active,
+          ...(companyId
+            ? { company: { connect: { id: companyId } } }
+            : {}),
         },
       });
     } catch (e) {
@@ -117,11 +132,15 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     const companyRaw = String(formData.get("companyId") ?? "").trim();
     const companyId = companyRaw || null;
     const active = formData.get("active") === "on";
+    const newPasswordRaw = String(formData.get("newPassword") ?? "").trim();
 
     if (!id || !name || !email) {
       redirect("/admin/users?error=invalid");
     }
     if (!ROLE_OPTIONS.includes(role)) return;
+    if (newPasswordRaw.length > 0 && newPasswordRaw.length < 6) {
+      redirect("/admin/users?error=password_weak");
+    }
 
     const existing = await prisma.user.findUnique({ where: { id } });
     if (!existing) redirect("/admin/users");
@@ -149,7 +168,18 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     try {
       await prisma.user.update({
         where: { id },
-        data: { name, email, role, companyId, active },
+        data: {
+          name,
+          email,
+          role,
+          active,
+          company: companyId
+            ? { connect: { id: companyId } }
+            : { disconnect: true },
+          ...(newPasswordRaw.length >= 6
+            ? { passwordHash: await hashPassword(newPasswordRaw) }
+            : {}),
+        },
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
@@ -210,17 +240,19 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
             ? "Deve existir pelo menos um superadmin ativo. Promova outro usuário antes."
             : err === "invalid"
               ? "Preencha nome e e-mail válidos."
-              : null;
+              : err === "password_weak"
+                ? "A senha deve ter pelo menos 6 caracteres."
+                : null;
 
   return (
     <section className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold">Usuários</h1>
         <p className="mt-2 text-slate-700">
-          Cadastro de pessoas da operação (vínculo com empresa e perfil). O
-          login do painel continua usando <code className="text-sm">ADMIN_EMAIL</code>{" "}
-          no <code className="text-sm">.env</code>; inclua novos e-mails aqui
-          para histórico de lotes e evolução multi-usuário.
+          Cada usuário recebe <strong>senha</strong> (armazenada com hash).
+          Quem tem senha no banco entra só com e-mail + senha. O seed grava
+          senha a partir de <code className="text-sm">ADMIN_PASSWORD</code> no{" "}
+          <code className="text-sm">.env</code> para o admin inicial.
         </p>
       </div>
 
@@ -274,6 +306,18 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                 </option>
               ))}
             </select>
+          </label>
+          <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+            <span className="font-medium text-slate-700">Senha inicial</span>
+            <input
+              autoComplete="new-password"
+              className="rounded-md border border-slate-300 px-3 py-2"
+              minLength={6}
+              name="password"
+              placeholder="Mínimo 6 caracteres"
+              required
+              type="password"
+            />
           </label>
           <label className="flex items-center gap-2 text-sm sm:col-span-2">
             <input defaultChecked name="active" type="checkbox" />
@@ -352,6 +396,28 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                         ))}
                       </select>
                     </label>
+                    <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+                      <span className="font-medium text-slate-700">
+                        Nova senha (opcional)
+                      </span>
+                      <input
+                        autoComplete="new-password"
+                        className="rounded-md border border-slate-300 px-3 py-2"
+                        minLength={6}
+                        name="newPassword"
+                        placeholder={
+                          u.hasPassword
+                            ? "Deixe em branco para manter a atual"
+                            : "Defina uma senha (mín. 6 caracteres)"
+                        }
+                        type="password"
+                      />
+                    </label>
+                    <p className="text-xs text-slate-500 sm:col-span-2">
+                      {u.hasPassword
+                        ? "Senha de login cadastrada no sistema."
+                        : "Sem senha no banco: use o fluxo bootstrap do .env se for o e-mail admin."}
+                    </p>
                     <label className="flex items-center gap-2 text-sm sm:col-span-2">
                       <input defaultChecked={u.active} name="active" type="checkbox" />
                       <span className="font-medium text-slate-700">Ativo</span>

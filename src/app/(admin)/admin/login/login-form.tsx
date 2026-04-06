@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { AdminCallout } from "@/components/admin/admin-callout";
+import { Button } from "@/components/ui/button";
 
 type LoginFormProps = {
   /** Erro vindo da URL (ex.: callback NextAuth). */
@@ -78,13 +79,9 @@ export function LoginForm({ initialUrlError }: LoginFormProps) {
         />
       </div>
 
-      <button
-        className="w-full rounded-md bg-slate-900 px-4 py-2.5 font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={loading}
-        type="submit"
-      >
+      <Button className="w-full" disabled={loading} size="lg" type="submit">
         {loading ? "Entrando…" : "Entrar"}
-      </button>
+      </Button>
     </form>
   );
 }

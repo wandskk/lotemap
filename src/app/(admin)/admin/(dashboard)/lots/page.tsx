@@ -7,6 +7,11 @@ import {
   PublicLotStatus,
 } from "@prisma/client";
 import { AdminCallout } from "@/components/admin/admin-callout";
+import {
+  assertDevelopmentAccessible,
+  developmentWhereForScope,
+  getAdminDataScope,
+} from "@/lib/admin-scope";
 import { getCurrentDbUserId } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import {
@@ -60,7 +65,24 @@ type LotsPageProps = {
 export default async function LotsPage({ searchParams }: LotsPageProps) {
   const sp = await searchParams;
 
+  const scope = await getAdminDataScope();
+  if (scope.kind === "blocked") {
+    return (
+      <section className="space-y-6">
+        <h1 className="text-2xl font-semibold">Lotes</h1>
+        <AdminCallout variant="warning">
+          {scope.reason === "no_db_user"
+            ? "Seu e-mail não está na tabela de usuários. Rode o seed ou peça cadastro."
+            : "Seu usuário não está vinculado a uma empresa. Peça a um superadmin para associar sua conta a uma empresa."}
+        </AdminCallout>
+      </section>
+    );
+  }
+
+  const devWhere = developmentWhereForScope(scope);
+
   const developments = await prisma.development.findMany({
+    where: devWhere,
     include: { city: true },
     orderBy: [{ name: "asc" }],
   });
@@ -91,6 +113,9 @@ export default async function LotsPage({ searchParams }: LotsPageProps) {
 
   async function createLot(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+
     const developmentId = String(formData.get("developmentId") ?? "");
     const blockId = String(formData.get("blockId") ?? "");
     const code = String(formData.get("code") ?? "").trim();
@@ -106,6 +131,9 @@ export default async function LotsPage({ searchParams }: LotsPageProps) {
       redirect(
         `/admin/lots?developmentId=${developmentId}&blockId=${blockId}`,
       );
+    }
+    if (!(await assertDevelopmentAccessible(developmentId, scope))) {
+      redirect("/admin/lots");
     }
     if (!(await assertBlockInDevelopment(blockId, developmentId))) {
       redirect(`/admin/lots?developmentId=${developmentId}`);
@@ -154,6 +182,9 @@ export default async function LotsPage({ searchParams }: LotsPageProps) {
 
   async function updateLot(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+
     const id = String(formData.get("id") ?? "");
     const developmentId = String(formData.get("developmentId") ?? "");
     const blockId = String(formData.get("blockId") ?? "");
@@ -170,6 +201,9 @@ export default async function LotsPage({ searchParams }: LotsPageProps) {
       redirect(
         `/admin/lots?developmentId=${developmentId}&blockId=${blockId}`,
       );
+    }
+    if (!(await assertDevelopmentAccessible(developmentId, scope))) {
+      redirect("/admin/lots");
     }
     if (!(await assertBlockInDevelopment(blockId, developmentId))) {
       redirect(`/admin/lots?developmentId=${developmentId}`);
@@ -254,10 +288,16 @@ export default async function LotsPage({ searchParams }: LotsPageProps) {
 
   async function deleteLot(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+
     const id = String(formData.get("id") ?? "");
     const developmentId = String(formData.get("developmentId") ?? "");
     const blockId = String(formData.get("blockId") ?? "");
     if (!id || !developmentId || !blockId) {
+      redirect("/admin/lots");
+    }
+    if (!(await assertDevelopmentAccessible(developmentId, scope))) {
       redirect("/admin/lots");
     }
 

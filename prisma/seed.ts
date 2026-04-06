@@ -2,10 +2,15 @@ import "dotenv/config";
 
 import { DevelopmentStatus, UserRole } from "@prisma/client";
 
+import { hashPassword } from "../src/lib/password";
 import { prisma } from "../src/lib/prisma";
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL ?? "devwk.c@gmail.com";
+  const adminEmail = (process.env.ADMIN_EMAIL ?? "devwk.c@gmail.com")
+    .trim()
+    .toLowerCase();
+  const adminPasswordPlain = (process.env.ADMIN_PASSWORD ?? "change-me").trim();
+  const passwordHash = await hashPassword(adminPasswordPlain);
 
   const company = await prisma.company.upsert({
     where: { slug: "demo-urbanismo" },
@@ -41,10 +46,12 @@ async function main() {
       name: "Admin LoteMap",
       role: UserRole.SUPERADMIN,
       active: true,
+      passwordHash,
     },
     create: {
       name: "Admin LoteMap",
       email: adminEmail,
+      passwordHash,
       role: UserRole.SUPERADMIN,
       active: true,
       companyId: company.id,

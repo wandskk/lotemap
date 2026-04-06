@@ -2,6 +2,11 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AdminCallout } from "@/components/admin/admin-callout";
+import {
+  assertDevelopmentAccessible,
+  developmentWhereForScope,
+  getAdminDataScope,
+} from "@/lib/admin-scope";
 import { prisma } from "@/lib/prisma";
 
 type BlocksPageProps = {
@@ -12,7 +17,24 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
   const sp = await searchParams;
   const error = sp.error;
 
+  const scope = await getAdminDataScope();
+  if (scope.kind === "blocked") {
+    return (
+      <section className="space-y-6">
+        <h1 className="text-2xl font-semibold">Quadras</h1>
+        <AdminCallout variant="warning">
+          {scope.reason === "no_db_user"
+            ? "Seu e-mail não está na tabela de usuários. Rode o seed ou peça cadastro."
+            : "Seu usuário não está vinculado a uma empresa. Peça a um superadmin para associar sua conta a uma empresa."}
+        </AdminCallout>
+      </section>
+    );
+  }
+
+  const devWhere = developmentWhereForScope(scope);
+
   const developments = await prisma.development.findMany({
+    where: devWhere,
     include: { city: true },
     orderBy: [{ name: "asc" }],
   });
@@ -29,22 +51,39 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
       })
     : [];
 
+  const nextBlockSortOrder =
+    blocks.length === 0 ? 0 : Math.max(...blocks.map((b) => b.sortOrder)) + 1;
+
   async function createBlock(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+
     const developmentId = String(formData.get("developmentId") ?? "");
     const code = String(formData.get("code") ?? "").trim();
-    const sortOrderRaw = String(formData.get("sortOrder") ?? "0").trim();
-    const sortOrder = Number.parseInt(sortOrderRaw, 10);
 
     if (!developmentId || !code) {
       redirect(`/admin/blocks?developmentId=${developmentId}`);
     }
+    if (!(await assertDevelopmentAccessible(developmentId, scope))) {
+      redirect("/admin/blocks");
+    }
+
+    const sortOrderRaw = String(formData.get("sortOrder") ?? "").trim();
+    const agg = await prisma.block.aggregate({
+      where: { developmentId },
+      _max: { sortOrder: true },
+    });
+    const nextOrder = (agg._max.sortOrder ?? -1) + 1;
+    const parsed = Number.parseInt(sortOrderRaw, 10);
+    const sortOrder =
+      sortOrderRaw === "" || !Number.isFinite(parsed) ? nextOrder : parsed;
 
     await prisma.block.create({
       data: {
         developmentId,
         code,
-        sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
+        sortOrder,
       },
     });
     revalidatePath("/admin/blocks");
@@ -53,6 +92,9 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
 
   async function updateBlock(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+
     const id = String(formData.get("id") ?? "");
     const developmentId = String(formData.get("developmentId") ?? "");
     const code = String(formData.get("code") ?? "").trim();
@@ -61,6 +103,9 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
 
     if (!id || !developmentId || !code) {
       redirect(`/admin/blocks?developmentId=${developmentId}`);
+    }
+    if (!(await assertDevelopmentAccessible(developmentId, scope))) {
+      redirect("/admin/blocks");
     }
 
     await prisma.block.update({
@@ -76,17 +121,21 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
 
   async function deleteBlock(formData: FormData) {
     "use server";
+    const scope = await getAdminDataScope();
+    if (scope.kind === "blocked") return;
+
     const id = String(formData.get("id") ?? "");
     const developmentId = String(formData.get("developmentId") ?? "");
     if (!id || !developmentId) {
       redirect("/admin/blocks");
     }
+    if (!(await assertDevelopmentAccessible(developmentId, scope))) {
+      redirect("/admin/blocks");
+    }
 
     const lotCount = await prisma.lot.count({ where: { blockId: id } });
     if (lotCount > 0) {
-      redirect(
-        `/admin/blocks?developmentId=${developmentId}&error=has_lots`,
-      );
+      redirect(`/admin/blocks?developmentId=${developmentId}&error=has_lots`);
     }
 
     await prisma.block.delete({ where: { id } });
@@ -139,8 +188,8 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
 
           {error === "has_lots" ? (
             <AdminCallout variant="error">
-              Não é possível remover uma quadra que ainda possui lotes. Remova ou
-              mova os lotes antes.
+              Não é possível remover uma quadra que ainda possui lotes. Remova
+              ou mova os lotes antes.
             </AdminCallout>
           ) : null}
 
@@ -169,9 +218,10 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
                   <label className="flex flex-col gap-1 text-sm">
                     <span className="font-medium text-slate-700">Ordem</span>
                     <input
-                      className="w-24 rounded-md border border-slate-300 px-3 py-2"
-                      defaultValue={0}
+                      className="w-24 rounded-md border border-slate-300 px-3 py-2 tabular-nums"
+                      defaultValue={nextBlockSortOrder}
                       name="sortOrder"
+                      title="Sugerido: próximo na sequência"
                       type="number"
                     />
                   </label>
@@ -186,7 +236,9 @@ export default async function BlocksPage({ searchParams }: BlocksPageProps) {
 
               <div className="rounded-lg border border-slate-200 bg-white">
                 <div className="border-b border-slate-200 px-5 py-4">
-                  <h2 className="text-lg font-medium">Quadras deste loteamento</h2>
+                  <h2 className="text-lg font-medium">
+                    Quadras deste loteamento
+                  </h2>
                 </div>
                 <div className="p-5">
                   {blocks.length === 0 ? (
