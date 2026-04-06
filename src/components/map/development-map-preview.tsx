@@ -72,6 +72,24 @@ function findLotElement(root: HTMLElement, ref: string): Element | null {
   return null;
 }
 
+function findLotFromElement(
+  startNode: Element | null,
+  lots: MapLotForPreview[],
+): MapLotForPreview | null {
+  let node: Element | null = startNode;
+  for (let i = 0; i < 12 && node; i++) {
+    const id = node.getAttribute("id");
+    const dataId = node.getAttribute("data-lot-id");
+    const ref = dataId ?? id;
+    if (ref) {
+      const lot = lots.find((l) => l.geometryRef === ref);
+      if (lot) return lot;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
 function paintElement(el: Element, color: string, selected: boolean) {
   const stroke = selected ? "#0f172a" : "rgba(15,23,42,0.25)";
   const strokeW = selected ? 3 : 1;
@@ -123,6 +141,9 @@ export function DevelopmentMapPreview({
   cityLabel,
 }: DevelopmentMapPreviewProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(
+    null,
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const applyColors = useCallback(() => {
@@ -146,27 +167,57 @@ export function DevelopmentMapPreview({
     const root = wrapRef.current;
     if (!root) return;
 
+    const TAP_MAX_PX = 14;
+    const TAP_MAX_MS = 450;
+
     const onClick = (e: MouseEvent) => {
-      const target = e.target as Element | null;
-      if (!target) return;
-      let node: Element | null = target;
-      for (let i = 0; i < 8 && node; i++) {
-        const id = node.getAttribute("id");
-        const dataId = node.getAttribute("data-lot-id");
-        const ref = dataId ?? id;
-        if (ref) {
-          const lot = lots.find((l) => l.geometryRef === ref);
-          if (lot) {
-            setSelectedId(lot.id);
-            return;
-          }
-        }
-        node = node.parentElement;
+      const lot = findLotFromElement(e.target as Element | null, lots);
+      if (lot) setSelectedId(lot.id);
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) {
+        touchStartRef.current = null;
+        return;
       }
+      const t = e.touches[0];
+      touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      const start = touchStartRef.current;
+      touchStartRef.current = null;
+      if (!start || e.changedTouches.length !== 1) return;
+      const t = e.changedTouches[0];
+      if (Date.now() - start.t > TAP_MAX_MS) return;
+      if (
+        Math.abs(t.clientX - start.x) > TAP_MAX_PX ||
+        Math.abs(t.clientY - start.y) > TAP_MAX_PX
+      ) {
+        return;
+      }
+
+      const fromTarget = findLotFromElement(e.target as Element | null, lots);
+      if (fromTarget) {
+        setSelectedId(fromTarget.id);
+        return;
+      }
+
+      const top = document.elementFromPoint(t.clientX, t.clientY);
+      if (!top || !root.contains(top)) return;
+
+      const lot = findLotFromElement(top, lots);
+      if (lot) setSelectedId(lot.id);
     };
 
     root.addEventListener("click", onClick);
-    return () => root.removeEventListener("click", onClick);
+    root.addEventListener("touchstart", onTouchStart, { passive: true });
+    root.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      root.removeEventListener("click", onClick);
+      root.removeEventListener("touchstart", onTouchStart);
+      root.removeEventListener("touchend", onTouchEnd);
+    };
   }, [lots]);
 
   if (!svgMarkup) {
@@ -210,8 +261,9 @@ export function DevelopmentMapPreview({
         </p>
       ) : (
         <p className="text-sm text-slate-600">
-          {developmentName} — use gestos ou scroll para zoom. Toque ou clique em
-          um lote para ver detalhes.
+          {developmentName} — a roda do mouse rola a página normalmente. Para
+          dar zoom na planta, use <strong>Ctrl + roda</strong> (ou pinça no
+          celular). Clique em um lote para ver detalhes.
         </p>
       )}
       <ul
@@ -258,6 +310,14 @@ export function DevelopmentMapPreview({
           initialScale={1}
           maxScale={5}
           minScale={0.3}
+          wheel={
+            isPublic
+              ? {
+                  // Zoom com roda só com Ctrl (ou gesto com ctrlKey); scroll normal não fica preso no mapa.
+                  wheelDisabled: true,
+                }
+              : undefined
+          }
         >
           <TransformComponent
             contentClass="!flex items-center justify-center p-4"
@@ -265,7 +325,7 @@ export function DevelopmentMapPreview({
           >
             <div
               ref={wrapRef}
-              className="max-w-full [&_svg]:max-h-[min(65vh,680px)] [&_svg]:max-w-full"
+              className="max-w-full touch-manipulation [&_svg]:max-h-[min(65vh,680px)] [&_svg]:max-w-full"
               dangerouslySetInnerHTML={{ __html: svgMarkup }}
             />
           </TransformComponent>
